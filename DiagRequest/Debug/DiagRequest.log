@@ -1,0 +1,12 @@
+﻿  CeMain.cpp
+  ceSerial.cpp
+  DiagRequest.cpp
+  Interface.cpp
+  Payload.cpp
+C:\Users\79823\Desktop\документы\работа\DiagRequest\DiagRequest\ceSerial.cpp(151,18): warning C4244: =: преобразование "int64_t" в "DWORD", возможна потеря данных
+C:\Users\79823\Desktop\документы\работа\DiagRequest\DiagRequest\ceSerial.cpp(250,30): warning C4244: аргумент: преобразование "int64_t" в "DWORD", возможна потеря данных
+  StructPack.cpp
+C:\Users\79823\Desktop\документы\работа\DiagRequest\DiagRequest\DiagRequest.cpp(38,13): warning C4101: buffer: неиспользованная локальная переменная
+C:\Users\79823\Desktop\документы\работа\DiagRequest\DiagRequest\Interface.cpp(226,29): warning C4244: return: преобразование "int64_t" в "uint32_t", возможна потеря данных
+C:\Users\79823\Desktop\документы\работа\DiagRequest\DiagRequest\Interface.cpp(231,17): warning C4244: аргумент: преобразование "uint64_t" в "unsigned long", возможна потеря данных
+  DiagRequest.vcxproj -> C:\Users\79823\Desktop\документы\работа\DiagRequest\Debug\DiagRequest.exe
