@@ -1,5 +1,7 @@
 #pragma once
 #include "messages.h"
+#include "StructPack.h"
+#include "Interface.h"
 
 #ifdef __GNUC__
 #define PACK( __Declaration__ ) __Declaration__ __attribute__((__packed__))

@@ -12,6 +12,8 @@
 #endif
 #include <string>
 
+
+
 #ifdef CE_SERIAL_IMPLEMENTATION
 
 void ceSerial::Delay(unsigned long ms) {
@@ -270,6 +272,8 @@ uint8_t  ceSerial::ReadChar(bool& success) {
 	DWORD dwRead;
 	DWORD length = 1;
 	BYTE* data = (BYTE*)(&rxchar);
+
+	std::unique_lock<std::mutex> read(readmtx);
 	//the creation of the overlapped read operation
 	if (!fWaitingOnRead) {
 		// Issue read operation.
@@ -306,6 +310,7 @@ uint8_t  ceSerial::ReadChar(bool& success) {
 			break;
 		}
 	}
+	read.unlock();
 	return rxchar;
 }
 

@@ -1,5 +1,7 @@
-#pragma once
-#include"Interface.h"
+#include "Payload.h"
+#include "StructPack.h"
+#include "Interface.h"
 
-//void CeMain();
+
+void CeMain(SerialPort& SimPort);
 

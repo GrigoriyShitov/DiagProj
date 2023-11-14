@@ -231,3 +231,22 @@ void SerialPort::DelaySim(uint64_t ms)
 	ce_uart->Delay(ms);
 }
 
+bool myqueue::pushN(int value)
+{
+	std::unique_lock<std::mutex> qlock(mtx);
+	q.push(value);
+	sem.release();
+	qlock.unlock();
+	return false;
+}
+
+bool myqueue::popN()
+{
+	if (!q.empty()) {
+		std::unique_lock<std::mutex> qlock(mtx);
+		q.pop();
+		qlock.unlock();
+		return true;
+	}
+	return false;
+}

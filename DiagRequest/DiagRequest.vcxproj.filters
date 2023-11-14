@@ -30,7 +30,7 @@
     <ClCompile Include="ceSerial.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="CeMain.cpp">
+    <ClCompile Include="CeThread.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>

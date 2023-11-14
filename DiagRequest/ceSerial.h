@@ -28,6 +28,9 @@
 
 #ifdef CE_WINDOWS
 #include <windows.h>
+#include <thread>
+#include <mutex>
+std::mutex readmtx;
 #endif
 
 class ceSerial {
