@@ -212,7 +212,7 @@ uint32_t SerialPort::ReadData(uint8_t* bufferPtr)//сделай реализацию кольцевого 
 	while (Tail != Head) {
 		
 		*ptr = *Tail;
-		cout << *ptr;
+		cout <<(int)*ptr<<" ";
 		cnt++;
 		if (Tail >= &RXbuf[bufSize])
 			Tail = RXbuf;
@@ -235,7 +235,7 @@ bool SerialPort::ReadToRX()//в цесериал побайтовое чтение и запись в RX
 	uint8_t dta = ce_uart->ReadChar(iret);
 	if (!iret)
 		return iret;
-	cout << (int)dta<< " ";
+	//cout << (int)dta<< " ";
 	*(Head++) = dta;
 	if (Head >= &RXbuf[bufSize])
 		Head = RXbuf;

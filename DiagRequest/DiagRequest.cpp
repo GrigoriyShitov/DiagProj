@@ -33,12 +33,15 @@ int main()
 
 	iret = SimPort.SendData(write_buffer, size);
 	
-
+	uint8_t length = 0;
 	while (1) {
 		q.waitData();
 		std::unique_lock<std::mutex> ceLock(consolemtx);
+		length=SimPort.ReadData(read_buffer);
 		q.popN();
+		std::cout << std::endl << (int)length;
 		ceLock.unlock();
+		break;
 	}
 
 
