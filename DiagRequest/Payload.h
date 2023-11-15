@@ -1,4 +1,7 @@
 #pragma once
+#ifndef PAYLOAD_H
+#define PAYLOAD_H
+
 #include "messages.h"
 #include "StructPack.h"
 #include "Interface.h"
@@ -28,3 +31,5 @@ private:
 	uint8_t m_buffer;
 
 };
+
+#endif

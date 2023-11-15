@@ -1,4 +1,7 @@
 #pragma once
+#ifndef MESSAGES_H
+#define MESSAGES_H
+
 #include<stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -132,3 +135,5 @@
 #define DIAG_MSG_SMALL_F (uint8_t(156))
 #define DIAG_QSH_TRACE_PAYLOAD_F (uint8_t(157))
 #define DIAG_MAX_F (uint8_t(157))
+
+#endif

@@ -1,3 +1,4 @@
+#pragma once
 #ifndef INTERFACE_H
 #define INTERFACE_H
 
@@ -55,11 +56,11 @@ public:
 	virtual bool SendData(uint8_t* dta, uint32_t size, bool async = false) = 0;
 
 	/**
-	 * @brief ReadString Прочитать строку в буфер
+	 * @brief ReadData Прочитать данные из RX буфера
 	 * @param bufferPtr Указатель на буфер
 	 * @return Длинна прочитанной строки
 	 */
-	virtual uint32_t ReadData(uint8_t* bufferPtr, size_t size) = 0;
+	virtual uint32_t ReadData(uint8_t* bufferPtr) = 0;
 
 
 	/**
@@ -94,8 +95,13 @@ public:
 
 	uint8_t GetByte(bool& res);
 	bool SendData(uint8_t* dta, uint32_t size, bool async = false);
-	uint32_t ReadData(uint8_t* bufferPtr, size_t size);
+
 	uint32_t GetDataSize();
+
+
+	uint32_t ReadData(uint8_t* bufferPtr);//needs for Main Thread
+	bool ReadToRX();//needs for CeThread
+
 
 	void DelaySim(uint64_t ms);
 	void Flush() {};
@@ -103,6 +109,8 @@ public:
 private:
 	std::string sPortName = "";
 	ceSerial* ce_uart = nullptr;
+	uint8_t* Tail= RXbuf;
+	uint8_t* Head = RXbuf;
 	uint8_t RXbuf[bufSize];//принять
 	uint8_t TXbuf[bufSize];//отправить
 };
@@ -118,12 +126,10 @@ public:
 	bool pushN(int value);
 	bool popN();
 	int sizeq() { return 0; };
-	void waitData()
-	{
-		sem.acquire();
-	}
+	void waitData();
+	
 };
 
-myqueue q;
+
 
 #endif

@@ -53,5 +53,8 @@
     <ClInclude Include="CeThread.h">
       <Filter>Исходные файлы</Filter>
     </ClInclude>
+    <ClInclude Include="DiagRequest.h">
+      <Filter>Исходные файлы</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

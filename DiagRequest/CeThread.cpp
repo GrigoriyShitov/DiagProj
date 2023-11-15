@@ -1,27 +1,23 @@
 #include "CeThread.h"
+#include "DiagRequest.h"
 
 void CeMain(SerialPort& SimPort) {
 	//uint8_t payload = 0;//var for check payload length
 	//uint8_t buffer[100];//buffer for string which needs to separate format string in pack method
-
-
-	uint8_t read_buffer[bufSize];//some buffuer for read op
-	uint8_t write_buffer[bufSize];//some buffuer for write op
-
-	memset(read_buffer, 0, bufSize);//zeroing buffers
-	memset(write_buffer, 0, bufSize);//
-
 	bool iret = SimPort.Init();//com port initialization;
-
-	
-	
+	q.pushN(0);
 	if (iret) {
 		std::cout << "Connected!\n";
 
 		while (TRUE)
 		{
-			SimPort.ReadData(read_buffer, bufSize);
-			q.pushN(1);
+			bool res = SimPort.ReadToRX();
+			if (res)
+			{
+				while (SimPort.ReadToRX()) {};
+				q.pushN(1);
+			}
+			
 		}
 		//simport.readdata(read_buffer, bufsize);//if on start programm the inner buffer isn't empty we get this data
 		////1
@@ -63,8 +59,4 @@ void CeMain(SerialPort& SimPort) {
 	}
 	else
 		std::cout << "Not connected!\n";
-}
-
-void R(myqueue& q) {
-
 }

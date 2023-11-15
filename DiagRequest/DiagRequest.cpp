@@ -1,16 +1,9 @@
-﻿#include <iostream>
-#include <Windows.h>
-#include <string>
-#include "CeThread.h"
-#include "Payload.h"
-#include "StructPack.h"
-#include <functional>
-
+﻿#include "DiagRequest.h"
 
 void menuoptions();
-
 std::mutex consolemtx;
 
+myqueue q;
 
 
 
@@ -31,14 +24,15 @@ int main()
 	memset(write_buffer, 0, bufSize);//
 
 	std::thread t0(CeMain, std::ref(SimPort));
-
+	q.waitData();
+	q.popN();
 	int32_t a = 0;//***  need to change this variables to define value of config op number
 	uint8_t b;
 	payload = StructPack::pack(buffer, 100, "3xi", a);
 	uint32_t size = Payload::SetPayload(DIAG_LOG_CONFIG_F, buffer, payload, write_buffer);
 
 	iret = SimPort.SendData(write_buffer, size);
-	SimPort.DelaySim(1000);
+	
 
 	while (1) {
 		q.waitData();

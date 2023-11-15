@@ -152,6 +152,7 @@
   <ItemGroup>
     <ClInclude Include="ceSerial.h" />
     <ClInclude Include="CeThread.h" />
+    <ClInclude Include="DiagRequest.h" />
     <ClInclude Include="Payload.h" />
     <ClInclude Include="Interface.h" />
     <ClInclude Include="messages.h" />
