@@ -39,9 +39,8 @@ int main()
 		std::unique_lock<std::mutex> ceLock(consolemtx);
 		length=SimPort.ReadData(read_buffer);
 		q.popN();
-		std::cout << std::endl << (int)length;
+		std::cout << std::endl << (unsigned int)length;
 		ceLock.unlock();
-		break;
 	}
 
 

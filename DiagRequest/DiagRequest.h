@@ -11,4 +11,11 @@ extern myqueue q;
 extern std::mutex consolemtx;
 
 
+class DiagReq {
+public:
+
+private:
+	SerialPort SimPort;
+};
+
 int main();
