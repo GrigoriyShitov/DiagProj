@@ -86,7 +86,7 @@ public:
 class SerialPort : public UartInterface
 {
 public:
-	SerialPort(std::string sPortName = "\\\\.\\COM31");
+	SerialPort(std::string sPortName = "\\\\.\\COM12");
 	~SerialPort();
 	// UartDeviceBase interface
 public:
@@ -104,7 +104,7 @@ public:
 
 
 	void DelaySim(uint64_t ms);
-	void Flush() {};
+	void Flush() ;
 
 private:
 	std::string sPortName = "";
@@ -116,19 +116,6 @@ private:
 };
 
 
-class myqueue
-{
-private:
-	std::queue<int> q;
-	std::mutex mtx;
-	std::counting_semaphore<200> sem{ 0 };
-public:
-	bool pushN(int value);
-	bool popN();
-	int sizeq() { return 0; };
-	void waitData();
-	
-};
 
 
 

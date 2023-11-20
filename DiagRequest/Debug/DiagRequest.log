@@ -1,4 +1,5 @@
 ﻿  CeThread.cpp
   DiagRequest.cpp
-C:\Users\79823\Desktop\документы\работа\DiagProj\DiagRequest\DiagRequest.cpp(30,10): warning C4101: b: неиспользованная локальная переменная
+  Main.cpp
+C:\Users\79823\Desktop\документы\работа\DiagProj\DiagRequest\Main.cpp(31,10): warning C4101: b: неиспользованная локальная переменная
   DiagRequest.vcxproj -> C:\Users\79823\Desktop\документы\работа\DiagProj\Debug\DiagRequest.exe

@@ -33,6 +33,12 @@
     <ClCompile Include="CeThread.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="msgQueue.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Interface.h">
@@ -54,6 +60,9 @@
       <Filter>Исходные файлы</Filter>
     </ClInclude>
     <ClInclude Include="DiagRequest.h">
+      <Filter>Исходные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="msgQueue.h">
       <Filter>Исходные файлы</Filter>
     </ClInclude>
   </ItemGroup>

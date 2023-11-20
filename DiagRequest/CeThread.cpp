@@ -1,11 +1,11 @@
 #include "CeThread.h"
 #include "DiagRequest.h"
 
-void CeMain(SerialPort& SimPort) {
+void CeMain(SerialPort& SimPort,msgQueue& q) {
 	//uint8_t payload = 0;//var for check payload length
 	//uint8_t buffer[100];//buffer for string which needs to separate format string in pack method
 	bool iret = SimPort.Init();//com port initialization;
-	q.pushN(0);
+	q.pushN(msgSimInit);
 	if (iret) {
 		std::cout << "Connected!\n";
 
@@ -15,7 +15,7 @@ void CeMain(SerialPort& SimPort) {
 			if (res)
 			{
 				while (SimPort.ReadToRX()) {};
-				q.pushN(1);
+				q.pushN(msgDataAvail);
 			}
 			
 		}
