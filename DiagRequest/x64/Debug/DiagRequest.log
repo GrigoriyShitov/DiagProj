@@ -1,0 +1,4 @@
+﻿  Interface.cpp
+C:\Users\79823\Desktop\документы\работа\DiagProj\DiagRequest\Interface.cpp(228,29): warning C4244: return: преобразование "int64_t" в "uint32_t", возможна потеря данных
+C:\Users\79823\Desktop\документы\работа\DiagProj\DiagRequest\Interface.cpp(249,17): warning C4244: аргумент: преобразование "uint64_t" в "unsigned long", возможна потеря данных
+  DiagRequest.vcxproj -> C:\Users\79823\Desktop\документы\работа\DiagProj\x64\Debug\DiagRequest.exe

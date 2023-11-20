@@ -1,5 +1,10 @@
 #pragma once
+#ifndef PAYLOAD_H
+#define PAYLOAD_H
+
 #include "messages.h"
+#include "StructPack.h"
+#include "Interface.h"
 
 #ifdef __GNUC__
 #define PACK( __Declaration__ ) __Declaration__ __attribute__((__packed__))
@@ -26,3 +31,5 @@ private:
 	uint8_t m_buffer;
 
 };
+
+#endif

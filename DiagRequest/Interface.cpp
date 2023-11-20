@@ -12,14 +12,14 @@ bool SerialPort::Init(){
 	LPCWSTR sPortName=L"\\\\.\\COM22";
 
 	//initialize port
-	hSerial = ::CreateFile(sPortName, 
-							GENERIC_READ | GENERIC_WRITE, 
-							0, 0, 
-							OPEN_EXISTING, 
-							FILE_ATTRIBUTE_NORMAL, 
+	hSerial = ::CreateFile(sPortName,
+							GENERIC_READ | GENERIC_WRITE,
+							0, 0,
+							OPEN_EXISTING,
+							FILE_ATTRIBUTE_NORMAL,
 							0);
-	
-    if (hSerial == INVALID_HANDLE_VALUE) {
+
+	if (hSerial == INVALID_HANDLE_VALUE) {
 		if (GetLastError() == ERROR_FILE_NOT_FOUND) {
 			cout << "serial port does not exist." << endl;
 			exit(EXIT_FAILURE);
@@ -66,8 +66,8 @@ bool SerialPort::SendData(uint8_t* dta, uint32_t size, bool async)
 	memset(RXbuf, 0, bufSize);
 	memcpy(RXbuf, dta, size);
 	uint8_t i = 0;
-	
-	
+
+
 
 	BOOL iRet = WriteFile(hSerial, RXbuf, size, &dwBytesWritten, NULL);
 	if (iRet) {
@@ -84,7 +84,7 @@ uint32_t SerialPort::ReadData(uint8_t* bufferPtr, size_t size)
 	while (TRUE)
 	{
 		uint8_t data;
-		
+
 		if (ptr < size) {
 			bool res = false;
 			data = GetByte(res);
@@ -178,13 +178,13 @@ bool SerialPort::Init()
 	if (!ce_uart->Open()) {
 		return true;
 	}
-	else 
+	else
 		return false;
 }
 
 bool SerialPort::DataAvail()
 {
-	if(ce_uart->GetDataSize())
+	if (ce_uart->GetDataSize())
 		return true;
 	return false;
 }
@@ -197,28 +197,30 @@ uint8_t SerialPort::GetByte(bool& res)
 bool SerialPort::SendData(uint8_t* dta, uint32_t size, bool async)
 {
 	bool iret = false;
-	memset(TXbuf, 0, bufSize);
 	memcpy(TXbuf, dta, size);
 	memset(dta, 0, size);
 	iret = ce_uart->Write(TXbuf, size);
 	return iret;
 }
 
-uint32_t SerialPort::ReadData(uint8_t* bufferPtr, size_t size)
+uint32_t SerialPort::ReadData(uint8_t* bufferPtr)//сделай реализацию кольцевого буфера
 {
 	bool iret = false;
 	uint8_t* ptr = bufferPtr;
-	
-	while (1){
+	uint32_t cnt = 0;
 
-		char dta = ce_uart->ReadChar(iret);
-		cout << *ptr;
-		if (!iret)
-			break;
-		*ptr = dta;
+	while (Tail != Head) {
+		
+		*ptr = *Tail;
+		cout <<(int)*ptr<<" ";
+		cnt++;
+		if (Tail >= &RXbuf[bufSize])
+			Tail = RXbuf;
+		else
+			Tail++;
 		ptr++;
 	}
-	return uint32_t();
+	return cnt;
 }
 
 uint32_t SerialPort::GetDataSize()
@@ -226,8 +228,46 @@ uint32_t SerialPort::GetDataSize()
 	return ce_uart->GetDataSize();
 }
 
+bool SerialPort::ReadToRX()//в цесериал побайтовое чтение и запись в RX
+{
+	bool iret = false;
+
+	uint8_t dta = ce_uart->ReadChar(iret);
+	if (!iret)
+		return iret;
+	//cout << (int)dta<< " ";
+	*(Head++) = dta;
+	if (Head >= &RXbuf[bufSize])
+		Head = RXbuf;
+	return iret;
+}
+
 void SerialPort::DelaySim(uint64_t ms)
 {
 	ce_uart->Delay(ms);
 }
 
+bool myqueue::pushN(int value)
+{
+	std::unique_lock<std::mutex> qlock(mtx);
+	q.push(value);
+	sem.release();
+	qlock.unlock();
+	return false;
+}
+
+bool myqueue::popN()
+{
+	if (!q.empty()) {
+		std::unique_lock<std::mutex> qlock(mtx);
+		q.pop();
+		qlock.unlock();
+		return true;
+	}
+	return false;
+}
+
+void myqueue::waitData()
+{
+	sem.acquire();
+}

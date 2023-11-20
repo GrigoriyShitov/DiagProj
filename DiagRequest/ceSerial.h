@@ -28,6 +28,9 @@
 
 #ifdef CE_WINDOWS
 #include <windows.h>
+#include <thread>
+#include <mutex>
+
 #endif
 
 class ceSerial {
@@ -45,6 +48,7 @@ private:
 	OVERLAPPED osWrite;
 	BOOL fWaitingOnRead;
 	COMMTIMEOUTS timeouts_ori;
+	std::mutex readmtx;
 #else
 	long fd;//serial_fd
 #endif
