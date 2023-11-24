@@ -5,19 +5,19 @@ void CeMain(SerialPort& SimPort,msgQueue& q) {
 	//uint8_t payload = 0;//var for check payload length
 	//uint8_t buffer[100];//buffer for string which needs to separate format string in pack method
 	bool iret = SimPort.Init();//com port initialization;
-	q.pushN(msgSimInit);
+	
 	if (iret) {
 		std::cout << "Connected!\n";
-
+		q.pushN(msgSimInit);
 		while (TRUE)
 		{
+			
 			bool res = SimPort.ReadToRX();
 			if (res)
 			{
 				while (SimPort.ReadToRX()) {};
 				q.pushN(msgDataAvail);
 			}
-			
 		}
 		//simport.readdata(read_buffer, bufsize);//if on start programm the inner buffer isn't empty we get this data
 		////1

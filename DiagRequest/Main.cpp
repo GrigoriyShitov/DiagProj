@@ -1,4 +1,4 @@
-#include "DiagRequest.h"
+﻿#include "DiagRequest.h"
 
 
 void menuoptions();
@@ -27,14 +27,36 @@ int main()
 	std::thread t0(CeMain, std::ref(SimPort),std::ref(q));
 	q.waitData();
 	q.popN();
-	int32_t a = 0;//***  need to change this variables to define value of config op number
-	uint8_t b;
-	payload = StructPack::pack(buffer, 100, "3xi", a);
-	uint32_t size = Payload::SetPayload(DIAG_LOG_CONFIG_F, buffer, payload, write_buffer);
-
-	iret = SimPort.SendData(write_buffer, size);
-
+	int32_t a = 0, c=0; //***  need to change this variables to define value of config op number
+	uint8_t b=5;
+	uint32_t size = 0;
+	uint8_t opNum = 0;
 	while (1) {
+		switch (opNum)
+		{
+		case 0:
+			payload = StructPack::pack(buffer, 100, "3xi", a);
+			size = Payload::SetPayload(DIAG_LOG_CONFIG_F, buffer, payload, write_buffer);
+
+			iret = SimPort.SendData(write_buffer, size);
+			opNum++;
+			break;
+		case 1:
+			payload = StructPack::pack(buffer, 100, "BxxI", b, c);
+			size = Payload::SetPayload(DIAG_EXT_MSG_CONFIG_F, buffer, payload, write_buffer);
+			iret = SimPort.SendData(write_buffer, size);
+			opNum++;
+			break;
+		case 2:
+			b = 0;
+			payload = StructPack::pack(buffer, 100, "3xIIBIIIIIIIIIIIIIIIIBBB", LOG_CONFIG_SET_MASK_OP, '\r', 255, 1, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, b, b, b);
+			size = Payload::SetPayload(DIAG_LOG_CONFIG_F, buffer, payload, write_buffer);
+			iret = SimPort.SendData(write_buffer, size);
+			opNum++;
+			break;
+		default:
+			break;
+		};
 		q.waitData();
 		std::unique_lock<std::mutex> ceLock(consolemtx);
 		uint8_t msg = q.front();
@@ -43,14 +65,14 @@ int main()
 		ceLock.unlock();
 		switch (msg)
 		{
-		case MsgDataAvail: // DataAvail
+		case msgDataAvail: // DataAvail
 			if (!diag.DataAvail())
 			{
 				std::cout << "Read Error"<< std::endl;
 				// TODO: Error logic
 			}
-			break;
-		case MsgTimeOut: // Timeout
+			continue;
+		case msgTimeOut: // Timeout
 			if (!diag.Timeout())
 			{
 				// TODO: Error logic
@@ -59,6 +81,9 @@ int main()
 		default:
 			break;
 		}
+
+		
+		
 	}
 
 

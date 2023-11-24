@@ -197,7 +197,14 @@ uint8_t SerialPort::GetByte(bool& res)
 bool SerialPort::SendData(uint8_t* dta, uint32_t size, bool async)
 {
 	bool iret = false;
+	
+	cout << "Sending request: ";
 	memcpy(TXbuf, dta, size);
+	for (int i=0;i<size;i++)
+	{
+		cout << hex << "/0x" << (int)TXbuf[i] << " ";
+	}
+	cout << endl;
 	memset(dta, 0, size);
 	iret = ce_uart->Write(TXbuf, size);
 	return iret;
@@ -208,11 +215,11 @@ uint32_t SerialPort::ReadData(uint8_t* bufferPtr)//сделай реализацию кольцевого 
 	bool iret = false;
 	uint8_t* ptr = bufferPtr;
 	uint32_t cnt = 0;
-
+	std::cout << "Received response: ";
 	while (Tail != Head) {
 		
 		*ptr = *Tail;
-		cout <<(int)*ptr<<" ";
+		cout << "/0x" <<hex<< (int)*ptr << " ";
 		cnt++;
 		if (Tail >= &RXbuf[bufSize])
 			Tail = RXbuf;

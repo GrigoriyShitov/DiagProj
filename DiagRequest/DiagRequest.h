@@ -24,7 +24,7 @@ public:
 	bool DataAvail()
 	{
 		ptr = m_uart->ReadData(m_rxBuffer);
-		std::cout << std::endl <<"Read successfuly. Length =" << ptr  << std::endl;
+		std::cout << std::endl <<"Read successfuly. Length =" <<std::dec <<(int)ptr  << std::endl;
 		
 		return true;
 	}
