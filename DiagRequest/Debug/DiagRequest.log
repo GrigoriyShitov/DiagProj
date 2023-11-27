@@ -1,5 +1,2 @@
-﻿  Interface.cpp
-C:\Users\79823\Desktop\документы\работа\DiagProj\DiagRequest\Interface.cpp(203,16): warning C4018: <: несоответствие типов со знаком и без знака
-C:\Users\79823\Desktop\документы\работа\DiagProj\DiagRequest\Interface.cpp(235,29): warning C4244: return: преобразование "int64_t" в "uint32_t", возможна потеря данных
-C:\Users\79823\Desktop\документы\работа\DiagProj\DiagRequest\Interface.cpp(254,17): warning C4244: аргумент: преобразование "uint64_t" в "unsigned long", возможна потеря данных
+﻿  Main.cpp
   DiagRequest.vcxproj -> C:\Users\79823\Desktop\документы\работа\DiagProj\Debug\DiagRequest.exe
