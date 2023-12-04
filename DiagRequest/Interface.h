@@ -86,7 +86,7 @@ public:
 class SerialPort : public UartInterface
 {
 public:
-	SerialPort(std::string sPortName = "\\\\.\\COM12");
+	SerialPort(std::string sPortName = "\\\\.\\COM8");
 	~SerialPort();
 	// UartDeviceBase interface
 public:

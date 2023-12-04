@@ -21,14 +21,8 @@ public:
 		m_uart = comPort;
 	};
 
-	bool DataAvail()
-	{
-		ptr = m_uart->ReadData(m_rxBuffer);
-		std::cout << std::endl <<"Read successfuly. Length =" <<std::dec <<(int)ptr  << std::endl;
-		
-		return true;
-	}
-
+	bool DataAvail();
+	bool Decode();
 	bool Timeout()
 	{
 		return true;
@@ -55,7 +49,7 @@ private:
 		return m_uart->SendData(buffer, size);
 	}
 	uint8_t m_rxBuffer[bufSize];
-	size_t ptr = 0;
+	size_t size = 0;
 	
 	UartInterface* m_uart;
 };

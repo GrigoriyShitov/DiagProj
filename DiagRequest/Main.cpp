@@ -67,8 +67,8 @@ int main()
 			break;
 		case 4:
 			a = 0;
-			b = 0;
-			payload = StructPack::pack(buffer, 1000, "3xIIBIIIIIIIIIIIIIIIIBBB", LOG_CONFIG_SET_MASK_OP, '\r', 255, 1, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, b, b, b);
+			b = 0;//3xIIBI63x 3xIIBIIIIIIIIIIIIIIIIBBB
+			payload = StructPack::pack(buffer, 1000, "3xIIBI63x", LOG_CONFIG_SET_MASK_OP, '\r', 255, 1, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, b, b, b);//23
 			size = Payload::SetPayload(DIAG_LOG_CONFIG_F, buffer, payload, write_buffer);
 			iret = SimPort.SendData(write_buffer, size);
 			opNum++;
@@ -80,7 +80,7 @@ int main()
 		std::unique_lock<std::mutex> ceLock(consolemtx);
 		uint8_t msg = q.front();
 		q.popN();
-		std::cout << (unsigned int)msg << std::endl;
+		std::cout << std::dec << std::endl << (unsigned int)msg << std::endl;
 		ceLock.unlock();
 		switch (msg)
 		{

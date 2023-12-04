@@ -215,11 +215,11 @@ uint32_t SerialPort::ReadData(uint8_t* bufferPtr)//сделай реализацию кольцевого 
 	bool iret = false;
 	uint8_t* ptr = bufferPtr;
 	uint32_t cnt = 0;
-	std::cout << "Received response: ";
+	//std::cout << "Received response: ";
 	while (Tail != Head) {
 		
 		*ptr = *Tail;
-		cout << "/0x" <<hex<< (int)*ptr << " ";
+		//cout << "/0x" <<hex<< (int)*ptr << " ";
 		cnt++;
 		if (Tail >= &RXbuf[bufSize])
 			Tail = RXbuf;
