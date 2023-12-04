@@ -37,6 +37,10 @@ bool DiagReq::Decode()
 		log_time += (*ptr++) << 8;
 		log_time += (*ptr++) << 16;
 		log_time += (*ptr++) << 24;
+		log_time += (*ptr++) << 32;
+		log_time += (*ptr++) << 40;
+		log_time += (*ptr++) << 48;
+		log_time += (*ptr++) << 56;
 		
 
 

@@ -1,15 +1,6 @@
-﻿  CeThread.cpp
-  ceSerial.cpp
-  DiagRequest.cpp
-  Interface.cpp
-C:\Users\grish\Desktop\документы\работа\DiagProj\DiagRequest\ceSerial.cpp(153,18): warning C4244: =: преобразование "int64_t" в "DWORD", возможна потеря данных
-C:\Users\grish\Desktop\документы\работа\DiagProj\DiagRequest\ceSerial.cpp(252,30): warning C4244: аргумент: преобразование "int64_t" в "DWORD", возможна потеря данных
-  Main.cpp
-C:\Users\grish\Desktop\документы\работа\DiagProj\DiagRequest\Interface.cpp(203,16): warning C4018: <: несоответствие типов со знаком и без знака
-C:\Users\grish\Desktop\документы\работа\DiagProj\DiagRequest\Interface.cpp(235,29): warning C4244: return: преобразование "int64_t" в "uint32_t", возможна потеря данных
-C:\Users\grish\Desktop\документы\работа\DiagProj\DiagRequest\Interface.cpp(254,17): warning C4244: аргумент: преобразование "uint64_t" в "unsigned long", возможна потеря данных
-  msgQueue.cpp
-  Payload.cpp
-  StructPack.cpp
-  LINK : не найден или не выполнена сборка C:\Users\grish\Desktop\документы\работа\DiagProj\Debug\DiagRequest.exe при последней инкрементной компоновке; выполняется полная компоновка
+﻿  DiagRequest.cpp
+C:\Users\grish\Desktop\документы\работа\DiagProj\DiagRequest\DiagRequest.cpp(40,24): warning C4293: <<: отрицательное или слишком большое смещение; поведение не определено
+C:\Users\grish\Desktop\документы\работа\DiagProj\DiagRequest\DiagRequest.cpp(41,24): warning C4293: <<: отрицательное или слишком большое смещение; поведение не определено
+C:\Users\grish\Desktop\документы\работа\DiagProj\DiagRequest\DiagRequest.cpp(42,24): warning C4293: <<: отрицательное или слишком большое смещение; поведение не определено
+C:\Users\grish\Desktop\документы\работа\DiagProj\DiagRequest\DiagRequest.cpp(43,24): warning C4293: <<: отрицательное или слишком большое смещение; поведение не определено
   DiagRequest.vcxproj -> C:\Users\grish\Desktop\документы\работа\DiagProj\Debug\DiagRequest.exe
