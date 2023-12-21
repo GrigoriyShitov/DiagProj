@@ -142,5 +142,9 @@
 
 #define LOG_CONFIG_SET_MASK_OP (uint8_t(3))
 
+#define LOG_CONFIG_DISABLE_OP (uint8_t(0))
 
+
+#define MSG_EXT_SUBCMD_SET_ALL_RT_MASKS (uint8_t(5))
+#define MSG_LVL_NONE (uint8_t(0))
 #endif

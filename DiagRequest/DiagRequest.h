@@ -1,4 +1,6 @@
 #pragma once
+#ifndef DIAGREQ_H
+#define DIAGREQ_H
 #include <iostream>
 #include <Windows.h>
 #include <string>
@@ -7,12 +9,12 @@
 #include "StructPack.h"
 #include <functional>
 
-#define msgSimInit 0
-#define msgDataAvail 1
-#define msgTimeOut 2
-
+#define msgSimInit (0)
+#define msgDataAvail (1)
+#define msgTimeOut (2)
+#define infinityReadStart true
+#define TERMINATE_WORK (255)
 extern std::mutex consolemtx;
-
 
 class DiagReq {
 public:
@@ -21,63 +23,36 @@ public:
 		m_uart = comPort;
 	};
 
-	bool DataAvail();
+	bool ExecuteStep(msgQueue& q);
 	bool Decode();
 	bool Timeout()
 	{
 		return true;
 	}
-
+	void ReadCycle(msgQueue& q);
 	bool TxOk()
 	{
 		return true;
 	}
 
-	bool StartREO()
-	{
-		return true;
-	}
+	bool StartREO();
 
-	bool Init()
-	{
-		return true;
-	}
+	bool Init();
+	bool inited = false;
 private:
 
-	bool SendData(uint8_t* buffer, size_t size)
-	{
-		return m_uart->SendData(buffer, size);
-	}
+	bool SendData(uint8_t* buffer, size_t size);
+	bool PushPacket(uint8_t opNum);
 	uint8_t m_rxBuffer[bufSize];
+	uint8_t m_txBuffer[bufSize];
+	uint8_t payload = 0;
+	uint8_t buffer[1000] = { 0 };
+	bool iret = false;
 	size_t size = 0;
-	
+	uint8_t PacketNumber = 0;
 	UartInterface* m_uart;
 };
 
 
-/*SerialPort SimPort;//serial port interface
 
-
-	uint8_t read_buffer[bufSize];//some buffuer for read op
-	uint8_t write_buffer[bufSize];//some buffuer for write op
-
-	bool iret;
-
-	uint8_t payload = 0;//var for check payload length
-	uint8_t buffer[100];//buffer for string which needs to separate format string in pack method
-
-	memset(read_buffer, 0, bufSize);//zeroing buffers
-	memset(write_buffer, 0, bufSize);//
-
-	std::thread t0(CeMain, std::ref(SimPort));
-	q.waitData();
-	q.popN();
-	int32_t a = 0;//***  need to change this variables to define value of config op number
-	uint8_t b;
-	payload = StructPack::pack(buffer, 100, "3xi", a);
-	uint32_t size = Payload::SetPayload(DIAG_LOG_CONFIG_F, buffer, payload, write_buffer);
-
-	iret = SimPort.SendData(write_buffer, size);
-	
-	uint8_t length = 0;
-	*/
+#endif

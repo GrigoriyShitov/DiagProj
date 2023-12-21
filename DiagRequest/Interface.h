@@ -62,6 +62,7 @@ public:
 	 */
 	virtual uint32_t ReadData(uint8_t* bufferPtr) = 0;
 
+	virtual void CloseConnection() = 0;
 
 	/**
 	 * @brief GetDataSize Получить число байт, лежащих во входном буфере UART
@@ -92,6 +93,7 @@ public:
 public:
 	bool Init();
 	bool DataAvail();
+	void CloseConnection();
 
 	uint8_t GetByte(bool& res);
 	bool SendData(uint8_t* dta, uint32_t size, bool async = false);

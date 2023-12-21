@@ -189,6 +189,11 @@ bool SerialPort::DataAvail()
 	return false;
 }
 
+void SerialPort::CloseConnection()
+{
+	ce_uart->Close();
+}
+
 uint8_t SerialPort::GetByte(bool& res)
 {
 	return uint8_t();
@@ -198,11 +203,11 @@ bool SerialPort::SendData(uint8_t* dta, uint32_t size, bool async)
 {
 	bool iret = false;
 	
-	cout << "Sending request: ";
+	cout << endl <<"Sending request: ";
 	memcpy(TXbuf, dta, size);
 	for (int i=0;i<size;i++)
 	{
-		cout << hex << "/0x" << (int)TXbuf[i] << " ";
+		cout << hex << showbase << (int)TXbuf[i] << " ";
 	}
 	cout << endl;
 	memset(dta, 0, size);
@@ -215,7 +220,7 @@ uint32_t SerialPort::ReadData(uint8_t* bufferPtr)//сделай реализацию кольцевого 
 	bool iret = false;
 	uint8_t* ptr = bufferPtr;
 	uint32_t cnt = 0;
-	//std::cout << "Received response: ";
+	
 	while (Tail != Head) {
 		
 		*ptr = *Tail;
