@@ -100,7 +100,7 @@ public:
 
 	uint32_t GetDataSize();
 
-
+	uint8_t getHead();
 	uint32_t ReadData(uint8_t* bufferPtr);//needs for Main Thread
 	bool ReadToRX();//needs for CeThread
 

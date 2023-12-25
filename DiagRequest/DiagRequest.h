@@ -13,7 +13,7 @@
 #define msgDataAvail (1)
 #define msgTimeOut (2)
 #define infinityReadStart true
-#define TERMINATE_WORK (255)
+
 extern std::mutex consolemtx;
 
 class DiagReq {
@@ -24,16 +24,13 @@ public:
 	};
 
 	bool ExecuteStep(msgQueue& q);
-	bool Decode();
+	bool Decode(size_t size);
 	bool Timeout()
 	{
 		return true;
 	}
 	void ReadCycle(msgQueue& q);
-	bool TxOk()
-	{
-		return true;
-	}
+
 
 	bool StartREO();
 
@@ -48,7 +45,7 @@ private:
 	uint8_t payload = 0;
 	uint8_t buffer[1000] = { 0 };
 	bool iret = false;
-	size_t size = 0;
+
 	uint8_t PacketNumber = 0;
 	UartInterface* m_uart;
 };

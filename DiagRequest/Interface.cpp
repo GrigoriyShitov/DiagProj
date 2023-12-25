@@ -1,110 +1,7 @@
 #include"Interface.h"
 
 using namespace std;
-/*
-SerialPort::~SerialPort() {
-	if ((hSerial!=NULL) && (hSerial!= INVALID_HANDLE_VALUE))
-	CloseHandle(hSerial);
-}
 
-
-bool SerialPort::Init(){
-	LPCWSTR sPortName=L"\\\\.\\COM22";
-
-	//initialize port
-	hSerial = ::CreateFile(sPortName,
-							GENERIC_READ | GENERIC_WRITE,
-							0, 0,
-							OPEN_EXISTING,
-							FILE_ATTRIBUTE_NORMAL,
-							0);
-
-	if (hSerial == INVALID_HANDLE_VALUE) {
-		if (GetLastError() == ERROR_FILE_NOT_FOUND) {
-			cout << "serial port does not exist." << endl;
-			exit(EXIT_FAILURE);
-		}
-		cout << "some other error occured." << endl;
-		exit(EXIT_FAILURE);
-	}
-	cout << "Com port successfuly opened." << endl;
-
-
-	//connection attributes
-	DCB dcbSerialParams = {};
-	dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
-	if (!GetCommState(hSerial, &dcbSerialParams)){
-		cout << "getting state error" << endl;
-	}
-	//setting atributes
-	dcbSerialParams.BaudRate = CBR_9600;
-	dcbSerialParams.ByteSize = 8;
-	dcbSerialParams.StopBits = ONESTOPBIT;
-	dcbSerialParams.Parity = NOPARITY;
-	if (!SetCommState(hSerial, &dcbSerialParams)) {
-		cout << "error setting serial port state" << endl;
-	}
-	return true;
-}
-
-bool SerialPort::DataAvail()
-{
-	return false;
-}
-
-uint8_t SerialPort::GetByte(bool &res) {
-	DWORD iSize;
-	uint8_t sReceivedChar;
-	res=ReadFile(hSerial, &sReceivedChar, 1, &iSize, 0);  // получаем 1 байт
-	return sReceivedChar;
-}
-
-
-bool SerialPort::SendData(uint8_t* dta, uint32_t size, bool async)
-{
-	DWORD dwBytesWritten;
-	memset(RXbuf, 0, bufSize);
-	memcpy(RXbuf, dta, size);
-	uint8_t i = 0;
-
-
-
-	BOOL iRet = WriteFile(hSerial, RXbuf, size, &dwBytesWritten, NULL);
-	if (iRet) {
-		cout << size << "Bytes in string " << dwBytesWritten << "Bytes sended." << endl;
-		return TRUE;
-	}
-	else
-		return FALSE;
-}
-
-uint32_t SerialPort::ReadData(uint8_t* bufferPtr, size_t size)
-{
-	uint32_t ptr = 0;
-	while (TRUE)
-	{
-		uint8_t data;
-
-		if (ptr < size) {
-			bool res = false;
-			data = GetByte(res);
-			if (!res)
-				continue;
-			cout <<" 0x" << std::hex << static_cast<int>(data);
-			bufferPtr[ptr++] = data;
-		}
-	}
-	return ptr;
-}
-
-uint32_t SerialPort::GetDataSize()
-{
-	cout << endl << "File type: "<< GetFileType(hSerial);
-	cout << endl << "File size: "<< GetFileSize(hSerial, NULL) << endl;
-	DWORD ret = INVALID_FILE_SIZE;
-	return 0;
-}
-*/
 const unsigned short crctable[256] = {
 	0x0000,0x1189,0x2312,0x329b,0x4624,0x57ad,0x6536,0x74bf,
 	0x8c48,0x9dc1,0xaf5a,0xbed3,0xca6c,0xdbe5,0xe97e,0xf8f7,
@@ -144,10 +41,8 @@ const unsigned short crctable[256] = {
 
 
 
-/*
-void Flush() {
-	//
-}*/
+
+
 
 uint16_t UartInterface::CreateCRC16(unsigned char* blk_adr, unsigned char blk_len) {
 	unsigned short crc = INIT;
@@ -202,10 +97,10 @@ uint8_t SerialPort::GetByte(bool& res)
 bool SerialPort::SendData(uint8_t* dta, uint32_t size, bool async)
 {
 	bool iret = false;
-	
-	cout << endl <<"Sending request: ";
+
+	cout << endl << "Sending request: ";
 	memcpy(TXbuf, dta, size);
-	for (int i=0;i<size;i++)
+	for (int i = 0;i < size;i++)
 	{
 		cout << hex << showbase << (int)TXbuf[i] << " ";
 	}
@@ -215,22 +110,30 @@ bool SerialPort::SendData(uint8_t* dta, uint32_t size, bool async)
 	return iret;
 }
 
-uint32_t SerialPort::ReadData(uint8_t* bufferPtr)//сделай реализацию кольцевого буфера
+uint8_t SerialPort::getHead()
+{
+	return *Head;
+}
+
+uint32_t SerialPort::ReadData(uint8_t* bufferPtr)//чтение из RX 
 {
 	bool iret = false;
 	uint8_t* ptr = bufferPtr;
 	uint32_t cnt = 0;
-	
 	while (Tail != Head) {
-		
+
 		*ptr = *Tail;
-		//cout << "/0x" <<hex<< (int)*ptr << " ";
 		cnt++;
 		if (Tail >= &RXbuf[bufSize])
 			Tail = RXbuf;
 		else
-			Tail++;
+		{
+			if (*Tail == 0x7e) { Tail++; break; }// обрубаем чтение из Rx по признаку конца пакета
+			Tail++;// не конец пакета
+		}
 		ptr++;
+
+
 	}
 	return cnt;
 }
@@ -251,6 +154,9 @@ bool SerialPort::ReadToRX()//в цесериал побайтовое чтение и запись в RX
 	*(Head++) = dta;
 	if (Head >= &RXbuf[bufSize])
 		Head = RXbuf;
+	if (dta == 0x7e) {
+		iret = false;
+	}// обрубаем по причине конец пакета
 	return iret;
 }
 

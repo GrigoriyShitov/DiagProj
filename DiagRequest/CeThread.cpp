@@ -7,17 +7,16 @@ void CeMain(SerialPort& SimPort,msgQueue& q) {
 
 	bool iret = SimPort.Init();//com port initialization;
 	
-
-
 	if (iret) {
 		std::cout << "Connected!\n";
 		q.pushN(msgSimInit);
 		while (1)
 		{
+
 			bool res = SimPort.ReadToRX();
 			if (res)
 			{
-				while (SimPort.ReadToRX()) {};
+				while (SimPort.ReadToRX()){};
 				q.pushN(msgDataAvail);
 			}
 		}

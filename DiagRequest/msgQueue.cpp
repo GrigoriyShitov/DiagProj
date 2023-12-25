@@ -1,5 +1,16 @@
 #include "msgQueue.h"
 
+bool msgQueue::terminateWork()
+{
+	terminateVar = TERMINATE_WORK;
+	return true;
+}
+
+uint8_t msgQueue::getTermVar()
+{
+	return terminateVar;
+}
+
 bool msgQueue::pushN(int value)
 {
 	std::unique_lock<std::mutex> qlock(mtx);
@@ -28,5 +39,7 @@ bool msgQueue::popN()
 
 void msgQueue::waitData()
 {
+	if (getTermVar() == TERMINATE_WORK)
+		return;
 	sem.acquire();
 }

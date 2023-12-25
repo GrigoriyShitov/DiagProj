@@ -15,7 +15,7 @@ void ConsoleReadThread()
 		std::cin >> readed;
 		if (readed == "q")
 		{ 
-			q.pushN(TERMINATE_WORK);
+			q.terminateWork();
 			return;
 		}
 	}
@@ -52,11 +52,11 @@ int main()
 	DiagReq diag(&SimPort);
 	bool iret = false;
 	
-
+	menuoptions();
 	std::thread t0(CeMain, std::ref(SimPort),std::ref(q));
 	std::thread t1(ConsoleReadThread);
 	//std::thread t2(Timer(DiagReq& diag));
-	menuoptions();
+	
 	
 
 	while (true)
@@ -70,11 +70,12 @@ int main()
 		q.popN();
 
 		if (iret == infinityReadStart) {
-			while (1) {
+			while (q.getTermVar() != TERMINATE_WORK) {
 				q.waitData();
 				diag.ReadCycle(q);
 				q.popN();
 			}
+			break;
 		}
 	}
 	

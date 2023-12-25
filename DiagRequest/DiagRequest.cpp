@@ -18,7 +18,7 @@ bool DiagReq::ExecuteStep(msgQueue& q)
 	//HARERABOTAT = true;
 	return false;
 }
-bool DiagReq::Decode()
+bool DiagReq::Decode(size_t size)
 {
 	uint8_t* ptr = m_rxBuffer;
 	uint8_t opcode = *ptr++;
@@ -84,9 +84,11 @@ bool DiagReq::Decode()
 
 void DiagReq::ReadCycle(msgQueue& q)
 {
+	size_t size = 0;
 	size = m_uart->ReadData(m_rxBuffer);
+	if (size <= 3) { std::cout << "zalupa" << std::endl; return; }
 	std::cout << std::endl << "Read successfuly. Length =" << std::dec << (int)size << std::endl;
-	Decode();
+	Decode(size);
 }
 
 bool DiagReq::StartREO()
@@ -146,7 +148,7 @@ bool DiagReq::StartREO()
 bool DiagReq::Init()
 {
 
-	//m_uart->Flush();
+	m_uart->Flush();
 
 	switch (PacketNumber)
 	{
@@ -208,7 +210,7 @@ bool DiagReq::PushPacket(uint8_t opNum)
 	default:
 		break;
 	}
-	size = Payload::SetPayload(DIAG_LOG_CONFIG_F, buffer, payload, m_txBuffer);
+	size_t size = Payload::SetPayload(DIAG_LOG_CONFIG_F, buffer, payload, m_txBuffer);
 	return SendData(m_txBuffer, size);
 }
 
