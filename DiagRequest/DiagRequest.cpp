@@ -1,5 +1,16 @@
 ﻿#include "DiagRequest.h"
 
+std::map<uint8_t, uint8_t>gsmtapChannels{
+				{DCCH, GSMTAP_CHANNEL_SDCCH},
+				{BCCH, GSMTAP_CHANNEL_BCCH},
+				{L2_RACH, GSMTAP_CHANNEL_RACH},
+				{CCCH, GSMTAP_CHANNEL_CCCH},
+				{SACCH, GSMTAP_CHANNEL_SDCCH | GSMTAP_CHANNEL_ACCH},
+				{SDCCH, GSMTAP_CHANNEL_SDCCH},
+				{FACCH_F, GSMTAP_CHANNEL_TCH_F | GSMTAP_CHANNEL_ACCH},
+				{FACCH_H, GSMTAP_CHANNEL_TCH_F | GSMTAP_CHANNEL_ACCH},
+				{L2_RACH_WITH_NO_DELAY, GSMTAP_CHANNEL_RACH}
+};
 
 bool DiagReq::ExecuteStep(msgQueue& q)
 {
@@ -10,7 +21,7 @@ bool DiagReq::ExecuteStep(msgQueue& q)
 			ReadCycle(q);
 		}
 		if (inited) {
-			if(StartREO())
+			if (StartREO())
 				iret = infinityReadStart;
 			return iret;
 		}
@@ -28,19 +39,20 @@ bool DiagReq::Decode(size_t size)
 	case DIAG_LOG_F:
 	{
 		//decode header
-		uint8_t pending_msgs = *ptr++;
-		uint16_t log_outer_length = 0;
-		log_outer_length += *ptr++;
-		log_outer_length += (*ptr++) << 8;
+		uint8_t pendingMsgs = *ptr++;
+
+		uint16_t logOuterLength = 0;
+		logOuterLength += *ptr++;
+		logOuterLength += (*ptr++) << 8;
 
 		//inner log packet
-		uint16_t log_inner_length = 0;
-		log_inner_length += *ptr++;
-		log_inner_length += (*ptr++) << 8;
+		uint16_t logInnerLength = 0;
+		logInnerLength += *ptr++;
+		logInnerLength += (*ptr++) << 8;
 
-		uint16_t log_type = 0;
-		log_type += *ptr++;
-		log_type += (*ptr++) << 8;
+		uint16_t logType = 0;
+		logType += *ptr++;
+		logType += (*ptr++) << 8;
 
 		uint64_t log_time = 0;
 		log_time += *ptr++;
@@ -52,12 +64,54 @@ bool DiagReq::Decode(size_t size)
 		log_time += (*ptr++) << 48;
 		log_time += (*ptr++) << 56;
 
+		std::cout << std::hex << std::showbase << "Received log. Log type:" << logType
+			<< " of length " << (int)logOuterLength << ": b'";
+		switch (logType)
+		{
+		case LOG_GSM_RR_SIGNALING_MESSAGE_C://2g
+		{
+			uint8_t* parser = ptr;
+			uint8_t channelType = (*parser++);
+			uint8_t messageType = (*parser++);
+			uint8_t length = (*parser++);
+
+			//packet = signalling_message[:length]!!!
+
+			std::cout << std::dec << std::endl << (int)(channelType) << "   " << (bool)(channelType & 0x80) << std::endl;
+			bool isUplink = (bool)(channelType & 0x80);
+
+			auto gsmFind = gsmtapChannels.find(channelType & 0x7f);
+			if (gsmFind == gsmtapChannels.end()) {
+				std::cout << "Unkwnown channel type.. Error logic:(TO DO)";
+			}
+			uint8_t gsmChannelType = (*gsmFind).second;
+			std::cout << std::dec << std::endl << (int)(gsmChannelType) << std::endl;
+			uint8_t interfaceType = GSMTAP_TYPE_ABIS;
+
+			if (gsmChannelType == GSMTAP_CHANNEL_BCCH || gsmChannelType)
+				parser++;
+
+			buildGsmtapIp(interfaceType, gsmChannelType, parser, isUplink);
+		}
+		break;
+		case WCDMA_SIGNALLING_MESSAGE://3g
 
 
+			break;
+		case LOG_LTE_RRC_OTA_MSG_LOG_C://4g
 
-		std::cout << std::hex << std::showbase << "Received log. Log type:" << log_type
-			<< " of length " << (int)log_outer_length
-			<< ": b'";
+
+			break;
+		case LOG_NR_RRC_OTA_MSG_LOG_C://5g
+
+
+			break;
+		default://unknown log type
+
+			break;
+		}
+
+
 		while (ptr != &m_rxBuffer[size - 3])
 			std::cout << (int)(*ptr++) << " ";
 
@@ -91,6 +145,14 @@ void DiagReq::ReadCycle(msgQueue& q)
 	Decode(size);
 }
 
+void DiagReq::buildGsmtapIp(uint8_t gsmtapProtocol, uint8_t gsmtap_channel_type, uint8_t* payload, bool is_uplink)
+{
+	//payload = StructPack::pack(buffer, 1000, "3xI", LOG_CONFIG_RETRIEVE_ID_RANGES_OP);
+	uint8_t packet[100] = { 0 };
+	StructPack::pack(packet, 100, "3xI", LOG_CONFIG_RETRIEVE_ID_RANGES_OP);
+}
+
+
 bool DiagReq::StartREO()
 {
 	if (PacketNumber < 2)
@@ -101,7 +163,7 @@ bool DiagReq::StartREO()
 
 	switch (PacketNumber)
 	{
-	case 2:
+	case LOG_CONGIF_FOR_RECEIVING_MSG:
 
 		if (!PushPacket(PacketNumber))
 		{
@@ -110,7 +172,7 @@ bool DiagReq::StartREO()
 		}
 		PacketNumber++;
 		break;
-	case 3:
+	case GSM_CONFIG:
 		if (!PushPacket(PacketNumber))
 		{
 			std::cout << "Push GSM error. \n Exit..." << std::endl;
@@ -118,7 +180,7 @@ bool DiagReq::StartREO()
 		}
 		PacketNumber++;
 		break;
-	case 4:
+	case TDSCDMA_CONFIG:
 
 		if (!PushPacket(PacketNumber))
 		{
@@ -127,7 +189,7 @@ bool DiagReq::StartREO()
 		}
 		PacketNumber++;
 		break;
-	case 5:
+	case LTE_CONFIG:
 
 		if (!PushPacket(PacketNumber))
 		{
@@ -140,7 +202,7 @@ bool DiagReq::StartREO()
 		break;
 	}
 
-	
+
 	return false;
 }
 
@@ -152,7 +214,7 @@ bool DiagReq::Init()
 
 	switch (PacketNumber)
 	{
-	case 0:
+	case DISABLING_LOG_CONFIG:
 
 		if (!PushPacket(PacketNumber))
 		{
@@ -161,7 +223,7 @@ bool DiagReq::Init()
 		}
 		PacketNumber++;
 		break;
-	case 1:
+	case SET_LVL_NONE_OF_MSG:
 		if (!PushPacket(PacketNumber))
 		{
 			std::cout << "Init error. \n Exit..." << std::endl;
@@ -173,8 +235,8 @@ bool DiagReq::Init()
 	default:
 		break;
 	}
-	
-	
+
+
 	return true;
 }
 
@@ -184,28 +246,27 @@ bool DiagReq::PushPacket(uint8_t opNum)
 {
 	switch (opNum)
 	{
-	case 0://send Diag commands to disable preexisting logging
+	case DISABLING_LOG_CONFIG:
 		payload = StructPack::pack(buffer, 1000, "3xi", LOG_CONFIG_DISABLE_OP);
 		break;
-	case 1:
+	case SET_LVL_NONE_OF_MSG:
 	{
 		payload = StructPack::pack(buffer, 1000, "BxxI", MSG_EXT_SUBCMD_SET_ALL_RT_MASKS, MSG_LVL_NONE);
 		break;
 	}
-	case 2:
-		// Send the message for receiving the highest valid log code for
-		// each existing log type(see defintions above).
+	case LOG_CONGIF_FOR_RECEIVING_MSG:
+
 		payload = StructPack::pack(buffer, 1000, "3xI", LOG_CONFIG_RETRIEVE_ID_RANGES_OP);
 		break;
-	case 3:
-		// Register logging for each supported log type
+	case GSM_CONFIG:
+
 		payload = StructPack::pack(buffer, 1000, "3xIIBB39xB30xB63x", LOG_CONFIG_SET_MASK_OP, 0x5, ' ', 0x04, 0x80, '@');//GSM s if we replace 0x80 on 0x0, gsm loggin will off
 		break;
-	case 4:
+	case TDSCDMA_CONFIG:
 		payload = StructPack::pack(buffer, 1000, "3xIIBI63x", LOG_CONFIG_SET_MASK_OP, '\r', 255, 1);//TDSCDMA
 		break;
-	case 5:
-		payload = StructPack::pack(buffer, 1000, "3xIIBB26xIBB35x", LOG_CONFIG_SET_MASK_OP, 0x0B,0x01,0x02,0x01,0x0c,'0');// APPS/LTE/WIMAX
+	case LTE_CONFIG:
+		payload = StructPack::pack(buffer, 1000, "3xIIBB26xIBB35x", LOG_CONFIG_SET_MASK_OP, 0x0B, 0x01, 0x02, 0x01, 0x0c, '0');// APPS/LTE/WIMAX
 		break;
 	default:
 		break;
@@ -218,3 +279,4 @@ bool DiagReq::SendData(uint8_t* buffer, size_t size)
 {
 	return m_uart->SendData(buffer, size);
 }
+

@@ -155,6 +155,8 @@
     <ClInclude Include="ceSerial.h" />
     <ClInclude Include="CeThread.h" />
     <ClInclude Include="DiagRequest.h" />
+    <ClInclude Include="GSMTAP.h" />
+    <ClInclude Include="LogTypes.h" />
     <ClInclude Include="msgQueue.h" />
     <ClInclude Include="Payload.h" />
     <ClInclude Include="Interface.h" />

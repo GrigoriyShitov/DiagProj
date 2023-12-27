@@ -110,10 +110,6 @@ bool SerialPort::SendData(uint8_t* dta, uint32_t size, bool async)
 	return iret;
 }
 
-uint8_t SerialPort::getHead()
-{
-	return *Head;
-}
 
 uint32_t SerialPort::ReadData(uint8_t* bufferPtr)//чтение из RX 
 {

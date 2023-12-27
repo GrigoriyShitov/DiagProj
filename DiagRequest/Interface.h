@@ -89,8 +89,7 @@ class SerialPort : public UartInterface
 public:
 	SerialPort(std::string sPortName = "\\\\.\\COM8");
 	~SerialPort();
-	// UartDeviceBase interface
-public:
+
 	bool Init();
 	bool DataAvail();
 	void CloseConnection();
@@ -100,7 +99,7 @@ public:
 
 	uint32_t GetDataSize();
 
-	uint8_t getHead();
+	
 	uint32_t ReadData(uint8_t* bufferPtr);//needs for Main Thread
 	bool ReadToRX();//needs for CeThread
 
