@@ -85,7 +85,7 @@ bool DiagReq::Decode(size_t size)
 				std::cout << "Unkwnown channel type.. Error logic:(TO DO)";
 			}
 			uint8_t gsmChannelType = (*gsmFind).second;
-			std::cout << std::dec << std::endl << (int)(gsmChannelType) << std::endl;
+			//std::cout << std::dec << std::endl << (int)(gsmChannelType) << std::endl;
 			uint8_t interfaceType = GSMTAP_TYPE_ABIS;
 
 			if (gsmChannelType == GSMTAP_CHANNEL_BCCH || gsmChannelType)
@@ -112,8 +112,8 @@ bool DiagReq::Decode(size_t size)
 		}
 
 
-		while (ptr != &m_rxBuffer[size - 3])
-			std::cout << (int)(*ptr++) << " ";
+		//while (ptr != &m_rxBuffer[size - 3])
+			//std::cout << std::hex << std::showbase << (int)(*ptr++) << " ";
 
 		break;
 	}
@@ -149,7 +149,17 @@ void DiagReq::buildGsmtapIp(uint8_t gsmtapProtocol, uint8_t gsmtap_channel_type,
 {
 	//payload = StructPack::pack(buffer, 1000, "3xI", LOG_CONFIG_RETRIEVE_ID_RANGES_OP);
 	uint8_t packet[100] = { 0 };
-	StructPack::pack(packet, 100, "3xI", LOG_CONFIG_RETRIEVE_ID_RANGES_OP);
+	uint8_t* packetPtr = packet;
+	while (1) {
+		memcpy(packetPtr, payload, sizeof(uint8_t));
+		std::cout << std::hex << std::showbase << (int)*packetPtr<< ' ';
+		if (*payload == '~')
+			break;
+		packetPtr++;
+		payload++;
+
+	}
+	//StructPack::pack(packet, 100, "3xI", LOG_CONFIG_RETRIEVE_ID_RANGES_OP);
 }
 
 
