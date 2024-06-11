@@ -100,7 +100,7 @@
 #define DIAG_IS2000_STATUS_F (uint8_t(112))
 #define DIAG_RLP_STAT_RESET_F (uint8_t(113))
 #define DIAG_TDSO_STAT_RESET_F (uint8_t(114))
-#define DIAG_LOG_CONFIG_F (uint8_t(115))
+#define DIAG_LOG_CONFIG_F (uint8_t(115)) //Name: Unnumbered acknowledgment UA	Type:R	Descript:Acknowledge acceptance of one of the set-mode commands.
 #define DIAG_TRACE_EVENT_REPORT_F (uint8_t(116))
 #define DIAG_SBI_READ_F (uint8_t(117))
 #define DIAG_SBI_WRITE_F (uint8_t(118))
@@ -136,4 +136,15 @@
 #define DIAG_QSH_TRACE_PAYLOAD_F (uint8_t(157))
 #define DIAG_MAX_F (uint8_t(157))
 
+
+
+#define LOG_CONFIG_RETRIEVE_ID_RANGES_OP (uint8_t(1))
+
+#define LOG_CONFIG_SET_MASK_OP (uint8_t(3))
+
+#define LOG_CONFIG_DISABLE_OP (uint8_t(0))
+
+
+#define MSG_EXT_SUBCMD_SET_ALL_RT_MASKS (uint8_t(5))
+#define MSG_LVL_NONE (uint8_t(0))
 #endif

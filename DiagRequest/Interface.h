@@ -62,6 +62,7 @@ public:
 	 */
 	virtual uint32_t ReadData(uint8_t* bufferPtr) = 0;
 
+	virtual void CloseConnection() = 0;
 
 	/**
 	 * @brief GetDataSize Получить число байт, лежащих во входном буфере UART
@@ -86,25 +87,25 @@ public:
 class SerialPort : public UartInterface
 {
 public:
-	SerialPort(std::string sPortName = "\\\\.\\COM31");
+	SerialPort(std::string sPortName = "\\\\.\\COM8");
 	~SerialPort();
-	// UartDeviceBase interface
-public:
+
 	bool Init();
 	bool DataAvail();
+	void CloseConnection();
 
 	uint8_t GetByte(bool& res);
 	bool SendData(uint8_t* dta, uint32_t size, bool async = false);
 
 	uint32_t GetDataSize();
 
-
+	
 	uint32_t ReadData(uint8_t* bufferPtr);//needs for Main Thread
 	bool ReadToRX();//needs for CeThread
 
 
 	void DelaySim(uint64_t ms);
-	void Flush() {};
+	void Flush() ;
 
 private:
 	std::string sPortName = "";
@@ -116,19 +117,6 @@ private:
 };
 
 
-class myqueue
-{
-private:
-	std::queue<int> q;
-	std::mutex mtx;
-	std::counting_semaphore<200> sem{ 0 };
-public:
-	bool pushN(int value);
-	bool popN();
-	int sizeq() { return 0; };
-	void waitData();
-	
-};
 
 
 

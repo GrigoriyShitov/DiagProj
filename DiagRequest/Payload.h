@@ -3,6 +3,8 @@
 #define PAYLOAD_H
 
 #include "messages.h"
+#include "LogTypes.h"
+#include "GSMTAP.h"
 #include "StructPack.h"
 #include "Interface.h"
 
@@ -21,11 +23,11 @@
 class Payload {
 public:
 	uint32_t static SetPayload(uint8_t opcode, uint8_t* packbuf, uint8_t sizepack, uint8_t* buf); //make final payload packet
-	void SetTemplate(const char* format);
+	/*void SetTemplate(const char* format);
 	template <typename T>
 	T readPayload(size_t index);
 	void Pack();
-	uint8_t* GeetRawData();
+	uint8_t* GeetRawData();*/
 	//void GeetRawData(uint8_t* buffer);
 private:
 	uint8_t m_buffer;
