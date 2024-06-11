@@ -77,7 +77,7 @@ bool DiagReq::Decode(size_t size)
 
 			//packet = signalling_message[:length]!!!
 
-			std::cout << std::dec << std::endl << (int)(channelType) << "   " << (bool)(channelType & 0x80) << std::endl;
+			//std::cout << std::dec << std::endl << (int)(channelType) << "   " << (bool)(channelType & 0x80) << std::endl;
 			bool isUplink = (bool)(channelType & 0x80);
 
 			auto gsmFind = gsmtapChannels.find(channelType & 0x7f);
@@ -87,20 +87,31 @@ bool DiagReq::Decode(size_t size)
 			uint8_t gsmChannelType = (*gsmFind).second;
 			//std::cout << std::dec << std::endl << (int)(gsmChannelType) << std::endl;
 			uint8_t interfaceType = GSMTAP_TYPE_ABIS;
-
-			if (gsmChannelType == GSMTAP_CHANNEL_BCCH || gsmChannelType)
-				parser++;
-
 			buildGsmtapIp(interfaceType, gsmChannelType, parser, isUplink);
+			/*if (gsmChannelType == GSMTAP_CHANNEL_BCCH || gsmChannelType)
+				parser++;*/
+
+
 		}
 		break;
 		case WCDMA_SIGNALLING_MESSAGE://3g
-
+			std::cout << "UMTS RECEIVED"<<std:: endl;
 
 			break;
 		case LOG_LTE_RRC_OTA_MSG_LOG_C://4g
+		{
+			std::ofstream out("packets.txt", std::ios::app);
+			if (out.is_open()) {
+				std::cout << std::endl << "file opened" << std::endl;
+			}
 
-
+			while (ptr != &m_rxBuffer[size - 3]) {
+				std::cout << std::hex << std::showbase << (int)(*ptr) << " ";
+				out << std::hex << std::showbase << (int)(*ptr++) << " ";
+			}
+			out << std::endl;
+			out.close();
+		}
 			break;
 		case LOG_NR_RRC_OTA_MSG_LOG_C://5g
 
@@ -112,8 +123,8 @@ bool DiagReq::Decode(size_t size)
 		}
 
 
-		//while (ptr != &m_rxBuffer[size - 3])
-			//std::cout << std::hex << std::showbase << (int)(*ptr++) << " ";
+		while (ptr != &m_rxBuffer[size - 3])
+			std::cout << std::hex << std::showbase << (int)(*ptr++) << " ";
 
 		break;
 	}
@@ -150,11 +161,19 @@ void DiagReq::buildGsmtapIp(uint8_t gsmtapProtocol, uint8_t gsmtap_channel_type,
 	//payload = StructPack::pack(buffer, 1000, "3xI", LOG_CONFIG_RETRIEVE_ID_RANGES_OP);
 	uint8_t packet[100] = { 0 };
 	uint8_t* packetPtr = packet;
+	std::ofstream out("packets.txt", std::ios::app);
+	if (out.is_open()) {
+		std::cout << std::endl << "file opened" << std::endl;
+	}
 	while (1) {
 		memcpy(packetPtr, payload, sizeof(uint8_t));
-		std::cout << std::hex << std::showbase << (int)*packetPtr<< ' ';
-		if (*payload == '~')
+		std::cout << std::hex << std::showbase << (int)*packetPtr << ' ';
+		if (*(payload + 2) == '~') {
+			out << std::endl;
+			out.close();
 			break;
+		}
+		out << std::hex << std::showbase << (int)*packetPtr << " ";
 		packetPtr++;
 		payload++;
 
@@ -204,6 +223,24 @@ bool DiagReq::StartREO()
 		if (!PushPacket(PacketNumber))
 		{
 			std::cout << "Push APPS/LTE/WIMAX error. \n Exit..." << std::endl;
+			return false;
+		}
+		PacketNumber++;
+		break;
+	case WCDMA_CONFIG:
+
+		if (!PushPacket(PacketNumber))
+		{
+			std::cout << "Push UMTS error. \n Exit..." << std::endl;
+			return false;
+		}
+		PacketNumber++;
+		break;
+	case UMTS_CONFIG:
+
+		if (!PushPacket(PacketNumber))
+		{
+			std::cout << "Push UMTS error. \n Exit..." << std::endl;
 			return false;
 		}
 		return true;
@@ -260,10 +297,8 @@ bool DiagReq::PushPacket(uint8_t opNum)
 		payload = StructPack::pack(buffer, 1000, "3xi", LOG_CONFIG_DISABLE_OP);
 		break;
 	case SET_LVL_NONE_OF_MSG:
-	{
 		payload = StructPack::pack(buffer, 1000, "BxxI", MSG_EXT_SUBCMD_SET_ALL_RT_MASKS, MSG_LVL_NONE);
 		break;
-	}
 	case LOG_CONGIF_FOR_RECEIVING_MSG:
 
 		payload = StructPack::pack(buffer, 1000, "3xI", LOG_CONFIG_RETRIEVE_ID_RANGES_OP);
@@ -277,6 +312,12 @@ bool DiagReq::PushPacket(uint8_t opNum)
 		break;
 	case LTE_CONFIG:
 		payload = StructPack::pack(buffer, 1000, "3xIIBB26xIBB35x", LOG_CONFIG_SET_MASK_OP, 0x0B, 0x01, 0x02, 0x01, 0x0c, '0');// APPS/LTE/WIMAX
+		break;
+	case WCDMA_CONFIG:
+		payload = StructPack::pack(buffer, 1000, "3xIIBB39xB474x", LOG_CONFIG_SET_MASK_OP, 0x04, 0xff, 0x0f, 0x80);//WCDMA
+		break;
+	case UMTS_CONFIG:
+		payload = StructPack::pack(buffer, 1000, "3xIIBB41xB120x", LOG_CONFIG_SET_MASK_OP, 0x07,0xff,0x04,0x04);//WCDMA
 		break;
 	default:
 		break;

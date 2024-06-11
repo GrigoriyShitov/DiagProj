@@ -1,6 +1,6 @@
 ﻿  DiagRequest.cpp
-C:\Users\grish\Desktop\документы\работа\DiagProj\DiagRequest\DiagRequest.cpp(62,24): warning C4293: <<: отрицательное или слишком большое смещение; поведение не определено
-C:\Users\grish\Desktop\документы\работа\DiagProj\DiagRequest\DiagRequest.cpp(63,24): warning C4293: <<: отрицательное или слишком большое смещение; поведение не определено
-C:\Users\grish\Desktop\документы\работа\DiagProj\DiagRequest\DiagRequest.cpp(64,24): warning C4293: <<: отрицательное или слишком большое смещение; поведение не определено
-C:\Users\grish\Desktop\документы\работа\DiagProj\DiagRequest\DiagRequest.cpp(65,24): warning C4293: <<: отрицательное или слишком большое смещение; поведение не определено
-  DiagRequest.vcxproj -> C:\Users\grish\Desktop\документы\работа\DiagProj\Debug\DiagRequest.exe
+C:\Users\grish\Desktop\Docs\работа\DiagProj\DiagRequest\DiagRequest.cpp(62,24): warning C4293: <<: отрицательное или слишком большое смещение; поведение не определено
+C:\Users\grish\Desktop\Docs\работа\DiagProj\DiagRequest\DiagRequest.cpp(63,24): warning C4293: <<: отрицательное или слишком большое смещение; поведение не определено
+C:\Users\grish\Desktop\Docs\работа\DiagProj\DiagRequest\DiagRequest.cpp(64,24): warning C4293: <<: отрицательное или слишком большое смещение; поведение не определено
+C:\Users\grish\Desktop\Docs\работа\DiagProj\DiagRequest\DiagRequest.cpp(65,24): warning C4293: <<: отрицательное или слишком большое смещение; поведение не определено
+  DiagRequest.vcxproj -> C:\Users\grish\Desktop\Docs\работа\DiagProj\Debug\DiagRequest.exe

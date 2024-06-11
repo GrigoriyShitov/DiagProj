@@ -22,7 +22,7 @@
 
 class Payload {
 public:
-	uint32_t static SetPayload(uint8_t opcode, uint8_t* packbuf, uint8_t sizepack, uint8_t* buf); //make final payload packet
+	uint32_t static SetPayload(uint8_t opcode, uint8_t* packbuf, uint16_t sizepack, uint8_t* buf); //make final payload packet
 	/*void SetTemplate(const char* format);
 	template <typename T>
 	T readPayload(size_t index);

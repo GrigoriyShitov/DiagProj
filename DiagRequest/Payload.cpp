@@ -4,10 +4,10 @@
 
 
 
-uint32_t Payload::SetPayload(uint8_t opcode, uint8_t* packbuf, uint8_t sizepack, uint8_t* buf) {
+uint32_t Payload::SetPayload(uint8_t opcode, uint8_t* packbuf, uint16_t sizepack, uint8_t* buf) {
 	memset(buf, 0, sizeof(buf));
 	uint8_t *ptr = buf;
-	uint8_t size = 0;
+	uint16_t size = 0;
 	*ptr++ = opcode; size++;
 	
 	memcpy(ptr, packbuf, sizepack);
