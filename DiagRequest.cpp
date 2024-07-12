@@ -193,7 +193,6 @@ bool DiagReq::Decode(size_t size)
 			parser += headerSpec - 2;
 			length = *parser++;
 			length += (*parser++) << 8;
-
 			parse4G(parser, (size_t)length);
 			//  while (ptr != &m_rxBuffer[size - 3])
 			//  {
@@ -207,7 +206,7 @@ bool DiagReq::Decode(size_t size)
 
 			break;
 		default: // unknown log type
-			std::cout << "хуйня какая-то" << std::endl;
+			//std::cout << "хуйня какая-то" << std::endl;
 			break;
 		}
 

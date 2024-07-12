@@ -3,11 +3,13 @@
 
 bool HARERABOTAT = false;
 
-void CeMain(SerialPort& SimPort,msgQueue& q) {
+void CeMain(SerialPort &SimPort, msgQueue &q)
+{
 
-	bool iret = SimPort.Init();//com port initialization;
-	
-	if (iret) {
+	bool iret = SimPort.Init(); // com port initialization;
+
+	if (iret)
+	{
 		std::cout << "Connected!\n";
 		q.pushN(msgSimInit);
 		while (1)
@@ -16,14 +18,19 @@ void CeMain(SerialPort& SimPort,msgQueue& q) {
 			bool res = SimPort.ReadToRX();
 			if (res)
 			{
-				while (SimPort.ReadToRX()){};
+				while (SimPort.ReadToRX())
+				{
+				};
 				q.pushN(msgDataAvail);
 			}
 		}
 
 		SimPort.CloseConnection();
-
 	}
 	else
+	{
+		q.pushN(TERMINATE_WORK);
 		std::cout << "Not connected!\n";
+		return;
+	}
 }

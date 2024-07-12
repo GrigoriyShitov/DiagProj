@@ -9,6 +9,7 @@
 				"-std=gnu++20",
 				"-fdiagnostics-color=always",
 				"-g",
+				"-w",
 				"*.cpp",
 				"SibParser/Libs/*.a",
 				"-Wshift-count-overflow",

@@ -54,7 +54,7 @@ int main()
 	
 	menuoptions();
 	std::thread t0(CeMain, std::ref(SimPort),std::ref(q));
-	std::thread t1(ConsoleReadThread);
+	//std::thread t1(ConsoleReadThread);
 	//std::thread t2(Timer(DiagReq& diag));
 	
 	
@@ -64,10 +64,15 @@ int main()
 		q.waitData();
 		std::unique_lock<std::mutex> ceLock(consolemtx);
 		uint8_t msg = q.front();
-		std::cout << std::dec << std::endl << (unsigned int)msg << std::endl;
+		//std::cout << std::dec << std::endl << (unsigned int)msg << std::endl;
+		if (msg==TERMINATE_WORK){
+			break;
+		}
 		ceLock.unlock();
 		iret = ExecuteStepHandle(diag, q);
 		q.popN();
+		
+		
 
 		if (iret == infinityReadStart) {
 			while (q.getTermVar() != TERMINATE_WORK) {
