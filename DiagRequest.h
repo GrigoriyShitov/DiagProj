@@ -53,7 +53,6 @@ public:
 		return true;
 	}
 	void ReadCycle(msgQueue& q);
-	void buildGsmtapIp(uint8_t gsmtapProtocol, uint8_t gsmtap_channel_type, uint8_t* payload, bool is_uplink);
 
 	bool StartREO();
 

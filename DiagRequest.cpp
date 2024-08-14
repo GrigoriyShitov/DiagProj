@@ -34,112 +34,103 @@ bool DiagReq::ExecuteStep(msgQueue &q)
 bool DiagReq::Decode(size_t size)
 {
 	uint8_t *ptr = m_rxBuffer;
-	size_t iSize = size;
 	uint8_t opcode = *ptr++;
-	iSize--;
 	switch (opcode)
 	{
 	case DIAG_LOG_F:
 	{
 		// decode header
 		uint8_t pendingMsgs = *ptr++;
-		iSize--;
 		uint16_t logOuterLength = 0;
 		logOuterLength += *ptr++;
-		iSize--;
 		logOuterLength += (*ptr++) << 8;
-		iSize--;
+		
+		// // inner log packet
+		// uint16_t logInnerLength = 0;
+		// logInnerLength += *ptr++;
+		// logInnerLength += (*ptr++) << 8;
+		// uint16_t logType = 0;
+		// logType += *ptr++;
+		// logType += (*ptr++) << 8;
+		// uint64_t log_time = 0;
+		// log_time += *ptr++;
+		// log_time += (*ptr++) << 8;
+		// log_time += (*ptr++) << 16;
+		// log_time += (*ptr++) << 24;
+		// log_time += (*ptr++) << 32;
+		// log_time += (*ptr++) << 40;
+		// log_time += (*ptr++) << 48;
+		// log_time += (*ptr++) << 56;
+
+		log_hdr log_header;
 		// inner log packet
-		uint16_t logInnerLength = 0;
-		logInnerLength += *ptr++;
-		iSize--;
-		logInnerLength += (*ptr++) << 8;
-		iSize--;
-		uint16_t logType = 0;
-		logType += *ptr++;
-		logType += (*ptr++) << 8;
-		iSize--;
-		iSize--;
-		uint64_t log_time = 0;
-		log_time += *ptr++;
-		log_time += (*ptr++) << 8;
-		log_time += (*ptr++) << 16;
-		log_time += (*ptr++) << 24;
-		log_time += (*ptr++) << 32;
-		log_time += (*ptr++) << 40;
-		log_time += (*ptr++) << 48;
-		log_time += (*ptr++) << 56;
-		iSize -= 8;
-		std::cout << std::hex << std::showbase << "Received log. Log type:" << logType
+
+		log_header.len = *ptr++;
+		log_header.len += (*ptr++) << 8;
+
+		log_header.code = *ptr++;
+		log_header.code += (*ptr++) << 8;
+
+		log_header.ts = *ptr++;
+		log_header.ts += (*ptr++) << 8;
+		log_header.ts += (*ptr++) << 16;
+		log_header.ts += (*ptr++) << 24;
+		log_header.ts += (*ptr++) << 32;
+		log_header.ts += (*ptr++) << 40;
+		log_header.ts += (*ptr++) << 48;
+		log_header.ts += (*ptr++) << 56;
+		std::cout << std::hex << std::showbase << "Received log. Log type:" << log_header.code
 				  << " of length " << std::dec << (int)logOuterLength << ": b'" << "size: " << size << std::endl;
-		switch (logType)
+		switch (log_header.code)
 		{
-		case LOG_GSM_RR_SIGNALING_MESSAGE_C: // 2g
+		case GSM(LOG_GSM_RR_SIGNALING_MESSAGE_C): // 2g
 		{
 			uint8_t *parser = ptr;
-			uint8_t channelType = (*parser++);
-			iSize--;
-			uint8_t messageType = (*parser++);
-			iSize--;
-			uint8_t length = (*parser++);
-			iSize--;
-			// packet = signalling_message[:length]!!!
+			diag_gsm_rr_msg msg;
+			msg.chan_type = (*parser++);
+			msg.msg_type = (*parser++);
+			msg.length = (*parser++);
 
-			// std::cout << std::dec << std::endl << (int)(channelType) << "   " << (bool)(channelType & 0x80) << std::endl;
-			bool isUplink = (bool)(channelType & 0x80);
+			bool isUplink = (bool)(msg.chan_type & 0x80);
 
-			auto gsmFind = gsmtapChannels.find(channelType & 0x7f);
+			auto gsmFind = gsmtapChannels.find(msg.chan_type & 0x7f);
 			if (gsmFind == gsmtapChannels.end())
 			{
 				std::cout << "Unkwnown channel type.. Error logic:(TO DO)";
 			}
 			uint8_t gsmChannelType = (*gsmFind).second;
-			// std::cout << std::dec << std::endl << (int)(gsmChannelType) << std::endl;
+			std::cout << "Direction: " << (isUplink ? "Uplink" : "Downlink") << std::endl;
+			std::cout << "Channel type: " << (int)gsmChannelType << std::endl;
 			uint8_t interfaceType = GSMTAP_TYPE_ABIS;
-			buildGsmtapIp(interfaceType, gsmChannelType, parser, isUplink);
-			/*if (gsmChannelType == GSMTAP_CHANNEL_BCCH || gsmChannelType)
-				parser++;*/
+			parse2G(parser);
+			
 		}
 		break;
-		case WCDMA_SIGNALLING_MESSAGE: // WCDMA
+		case WCDMA(LOG_WCDMA_SIGNALING_MSG_C): // WCDMA
 		{
 			std::cout << "WCDMA RECEIVED" << std::endl;
 			uint8_t *parser = ptr;
-			uint8_t channelType = (*parser++);
-			iSize--;
-			uint8_t radio_bearer = (*parser++);
-			iSize--;
-			uint16_t length = 0;
-			length += *parser++;
-			iSize--;
-			length += (*parser++) << 8;
-			iSize--;
-			// parser=signaling message
-			if (channelType >= 0x80)
-			{
-				channelType -= 0x80;
-				parser += 4;
-			}
+			diag_umts_rrc_msg wcdma_msg;
+			wcdma_msg.chan_type = (*parser++);
+			wcdma_msg.rb_id = (*parser++);
+			wcdma_msg.length = *parser++;
+			wcdma_msg.length += (*parser++) << 8;
 
-			parse3G(parser, (size_t)length);
+			parse3G(parser, (size_t)wcdma_msg.length);
 		}
-		case LOG_UMTS_NAS_OTA_MESSAGE_LOG_PACKET_C: // UMTS
+		case UMTS(LOG_UMTS_NAS_OTA_MESSAGE_LOG_PACKET_C): // UMTS
 		{
 			std::cout << "UMTS RECEIVED" << std::endl;
 			uint8_t *parser = ptr;
+			diag_umts_nas_ota_msg umts_msg;
+			umts_msg.direction =(*parser++);
 			
-			uint8_t isUplink=0;
-			isUplink=(*parser++);
-			
-			uint32_t length = 0;
-			
-			length += *parser++;
-			length += (*parser++) << 8;
-			length += (*parser++) << 16;
-			length += (*parser++) << 24;
-			iSize -= 6;
+			umts_msg.msg_length = *parser++;
+			umts_msg.msg_length += (*parser++) << 8;
+			umts_msg.msg_length += (*parser++) << 16;
+			umts_msg.msg_length += (*parser++) << 24;
 			// parser=signaling_message
-			parse3G(parser, (size_t)length);
+			parse3G(parser, (size_t)umts_msg.msg_length);
 		}
 		break;
 		case LOG_LTE_RRC_OTA_MSG_LOG_C: // 4g
@@ -149,9 +140,6 @@ bool DiagReq::Decode(size_t size)
 		case LOG_LTE_NAS_EMM_OTA_OUT_MSG_LOG_C:
 		{
 			std::cout << "LTE RECEIVED" << std::endl;
-
-			iSize-=3;//hdlc_decapsulate
-
 			uint8_t *parser = ptr;
 			uint8_t extHeaderVer = (*parser++);
 			uint8_t rrcRel = (*parser++);
@@ -174,10 +162,8 @@ bool DiagReq::Decode(size_t size)
 				bearerId = (*parser++);
 				phyCellId = (*parser++);
 				phyCellId += (*parser++) << 8;
-				iSize-=8;
 			}
 			else{
-				iSize-=6;
 			}
 			// parser=ext_header
 			uint16_t length = 0;
@@ -188,8 +174,8 @@ bool DiagReq::Decode(size_t size)
 
 			uint8_t headerSpec = freqType + 2 + 1 + 2; // freq_type + 'HBH'
 
-			if (*(parser + headerSpec - 1) != iSize - headerSpec)
-				headerSpec = freqType + 2 + 1 + 4 + 2; // freqType + HB4xH
+			//if (*(parser + headerSpec - 1) != iSize - headerSpec)
+			//	headerSpec = freqType + 2 + 1 + 4 + 2; // freqType + HB4xH
 			parser += headerSpec - 2;
 			length = *parser++;
 			length += (*parser++) << 8;
@@ -210,7 +196,7 @@ bool DiagReq::Decode(size_t size)
 			break;
 		}
 
-		while (ptr != &m_rxBuffer[size - 3])
+		while (ptr != &m_rxBuffer[size - 2])
 			std::cout << std::hex << std::showbase << (int)(*ptr++) << " ";
 		std::cout<< std::endl;
 		break;
@@ -243,8 +229,8 @@ bool DiagReq::Decode(size_t size)
 void DiagReq::ReadCycle(msgQueue &q)
 {
 	size_t size = 0;
-	size = m_uart->ReadData(m_rxBuffer);
-	if (size <= 3)
+	size = m_uart->ReadData(m_rxBuffer)-1;//terminate "~" symbol
+	if (size <3)
 	{
 		std::cout << "zalupa" << std::endl;
 		return;
@@ -252,11 +238,6 @@ void DiagReq::ReadCycle(msgQueue &q)
 	std::cout << std::endl
 			  << "Read successfuly. Length =" << std::dec << (int)size << std::endl;
 	Decode(size);
-}
-
-void DiagReq::buildGsmtapIp(uint8_t gsmtapProtocol, uint8_t gsmtap_channel_type, uint8_t *payload, bool is_uplink)
-{
-	parse2G(payload);
 }
 
 bool DiagReq::StartREO()
