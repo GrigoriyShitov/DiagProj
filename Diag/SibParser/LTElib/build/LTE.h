@@ -7,7 +7,7 @@ extern "C"
 {
 #endif
 
-    bool parse4G(uint8_t *packet,size_t size);
+    int parse4G(uint8_t *packet,size_t size,char* pduName);
 
 #ifdef __cplusplus
 }

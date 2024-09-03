@@ -25,7 +25,7 @@ clean:
 regen: regenerate-from-asn1-source
 
 regenerate-from-asn1-source:
-	asn1c -EF ../try-new-asn.asn1
-	asn1c -fcompound-names ../try-new-asn.asn1
+	asn1c -EF ../rrc-25.331-i00.asn1
+	asn1c -fcompound-names -pdu=all ../rrc-25.331-i00.asn1
 	rm converter-example.*
 

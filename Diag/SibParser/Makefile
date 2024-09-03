@@ -14,9 +14,7 @@ build:
 	$(CC) -Os -o $(GSM)/GSM.o -c $(GSM)/Sibs.cpp
 	ar rcs $(LIBRARIES)/GSM.a $(GSM)/GSM.o
 	ar rcs $(LIBRARIES)/UMTS.a $(UMTS)/*.o $(UMTS)/libasncodec.a 
-	ar t $(LIBRARIES)/UMTS.a
 	ar rcs $(LIBRARIES)/LTE.a $(LTE)/*.o $(LTE)/libasncodec.a
-	ar t $(LIBRARIES)/LTE.a
 
 regen:
 	cd $(UMTS) && make -f main3g.mk clean && make -f main3g.mk regen 

@@ -5,9 +5,8 @@
 #ifndef CETHREAD_H
 #define CETHREAD_H
 
-extern bool HARERABOTAT;
 
-void CeMain(SerialPort& SimPort,msgQueue& q);
+void CeMain(SerialPort& SimPort,msgQueue &qC,msgQueue &qM);
 
 
 #endif

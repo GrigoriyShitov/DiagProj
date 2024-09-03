@@ -2,8 +2,12 @@
 #ifndef PAYLOAD_H
 #define PAYLOAD_H
 
-#include "messages.h"
-#include "LogTypes.h"
+#include "protocol/diagcmd.h"
+#include "protocol/LogTypes.h"
+#include "protocol/diag_log_gsm.h"
+#include "protocol/protocol.h"
+#include "protocol/diag_log_wcdma.h"
+#include "protocol/diag_log_umts.h"
 #include "GSMTAP.h"
 #include "StructPack.h"
 #include "Interface.h"

@@ -21,7 +21,7 @@
 #include <unistd.h>   /* for isatty(3) */
 #include <asn_application.h>
 #include <asn_internal.h> /* for ASN__DEFAULT_STACK_MAX */
-
+#include "LTE.h"
 /* Convert "Type" defined by -DPDU into "asn_DEF_Type" */
 #ifdef PDU
 #define ASN_DEF_PDU(t) asn_DEF_##t
@@ -44,7 +44,7 @@ extern asn_TYPE_descriptor_t *asn_pdu_collection[];
 #endif
 #endif
 
-int parse4G(uint8_t *packet,size_t size)
+int parse4G(uint8_t *packet, size_t size,char* pduName)
 {
     FILE *binary_out;
     asn_TYPE_descriptor_t *pduType = PDU_Type_Ptr;
@@ -55,19 +55,66 @@ int parse4G(uint8_t *packet,size_t size)
     int ch;
     enum asn_transfer_syntax isyntax = ATS_UNALIGNED_BASIC_PER;
     enum asn_transfer_syntax osyntax = ATS_NONSTANDARD_PLAINTEXT;
-    pduType = asn_pdu_collection[4];
 
     void *structure = 0; /* Decoded structure */
-
-    printf("info pduType: %s\n   ", pduType->name);
     setvbuf(stdout, 0, _IOLBF, 0);
 
     uint8_t *i_bptr = packet;
-    size_t i_size = sizeof(packet);
-    printf("start decode,size %ld\n", i_size);
+    size_t i_size = size;
+    printf("start decode,size %ld, pduname %s\n", i_size, pduName);
     asn_dec_rval_t rval;
+    for(int i=0;;i++){
+        pduType = asn_pdu_collection[i];
+        if (pduType == 0){
+            printf("not found %s\n",pduName);
+            return 1;
+        }
+        if (strcmp(pduType->name, pduName) == 0){
+            break;
+        }
+        //printf("pduType->name %s where segfault\n",pduType->name);
+    }
+    // for (int i_pduType = 0; rval.code != RC_OK; i_pduType++)
+    // {
+    //     structure = 0;
+    //     switch (i_pduType)
+    //     {
+    //     case 0:
+    //         pduType = asn_pdu_collection[4];
+    //         break;
+    //     case 1:
+    //         pduType = asn_pdu_collection[12];
+    //         break;
+    //     case 2:
+    //         pduType = asn_pdu_collection[14];
+    //         break;
+    //     case 3:
+    //         pduType = asn_pdu_collection[16];
+    //         break;
+    //     case 4:
+    //         pduType = asn_pdu_collection[18];
+    //         break;
+    //     case 5:
+    //         pduType = asn_pdu_collection[20];
+    //         break;
+    //     default:
+    //         ASN_STRUCT_FREE(*pduType, structure);
+    //         return 1;
+    //         break;
+    //     }
+
+    //     rval = asn_decode(0, isyntax, pduType, (void **)&structure,
+    //                       i_bptr, i_size);
+    //     if (rval.code != RC_OK)
+    //     {
+    //         ASN_STRUCT_FREE(*pduType, structure);
+    //     }
+
+    // } // выдели типы pdu и напиши if else для asn_pdu_collection по индексам
+    printf("info pduType: %s\n   ", pduType->name);
     rval = asn_decode(0, isyntax, pduType, (void **)&structure,
-                      i_bptr, i_size);
+                          i_bptr, i_size);
+    setvbuf(stdout, 0, _IOLBF, 0);
 
     switch (rval.code)
     {

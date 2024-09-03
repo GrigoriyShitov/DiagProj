@@ -19,7 +19,7 @@ bool DiagReq::ExecuteStep(msgQueue &q)
 	{
 		if (msg == msgDataAvail)
 		{
-			ReadCycle(q);
+			ReadCycle();
 		}
 		if (inited)
 		{
@@ -31,115 +31,111 @@ bool DiagReq::ExecuteStep(msgQueue &q)
 	// HARERABOTAT = true;
 	return false;
 }
+bool DiagReq::SwitchMode(uint8_t mode)
+{
+	// payload = StructPack::pack(buffer, 1000, "3xI", (uint32_t)LOG_CONFIG_DISABLE_OP);
+
+	// size_t size = Payload::SetPayload(DIAG_LOG_CONFIG_F, buffer, payload, m_txBuffer);
+
+	// SendData(m_txBuffer, size);
+	diag_mode_config_req var;
+	var.PLMN_SELECTION_MODE = PLMN_SELECTION_MODE_AUTOMATIC;
+	var.PLMN_REQUESTED[0] = 0;
+	var.PLMN_REQUESTED[1] = 0;
+	var.PLMN_REQUESTED[2] = 0;
+	var.GW_ACQ_ORDER_PREF = GW_ACQ_ORDER_PREF_AUTOMATIC;
+	var.BAND_PREF = BAND_PREF_NO_CHANGE;
+	var.ROAM_PREF = ROAM_PREF_NO_CHANGE;
+	switch (mode)
+	{
+	case msgSwitchTo2g:
+		var.MODE_PREF = GSM_ONLY;
+		// payload = StructPack::pack(buffer, 1000, "B2x", uint8_t(15)); // cmlog_state_info
+		break;
+	case msgSwitchTo3g:
+		var.MODE_PREF = WCDMA_ONLY;
+		break;
+	case msgSwitchTo4g:
+		var.MODE_PREF = LTE_ONLY;
+		break;
+	default:
+		break;
+	}
+	payload = StructPack::pack(buffer, 1000, "BHBBBBIIIIII", var.SUBSYS_ID, var.SUBSYS_CMD_CODE, var.PLMN_SELECTION_MODE, var.PLMN_REQUESTED[0], var.PLMN_REQUESTED[1], var.PLMN_REQUESTED[2], var.MODE_PREF, var.GW_ACQ_ORDER_PREF, var.BAND_PREF, var.ROAM_PREF, var.HYBR_PREF, var.SRV_DOMAIN_PREF); // CMLOG_SYS_SEL_REQ_F TODO
+
+	uint32_t size = Payload::SetPayload(var.CMD_CODE, buffer, payload, m_txBuffer);
+
+	return SendData(m_txBuffer, size);
+}
 bool DiagReq::Decode(size_t size)
 {
 	uint8_t *ptr = m_rxBuffer;
-	size_t iSize = size;
+	uint8_t *packet = m_rxBuffer;
+	struct diag_packet *dp = (struct diag_packet *)ptr;
 	uint8_t opcode = *ptr++;
-	iSize--;
-	switch (opcode)
+	switch (dp->msg_class)
 	{
 	case DIAG_LOG_F:
 	{
-		// decode header
-		uint8_t pendingMsgs = *ptr++;
-		iSize--;
-		uint16_t logOuterLength = 0;
-		logOuterLength += *ptr++;
-		iSize--;
-		logOuterLength += (*ptr++) << 8;
-		iSize--;
-		// inner log packet
-		uint16_t logInnerLength = 0;
-		logInnerLength += *ptr++;
-		iSize--;
-		logInnerLength += (*ptr++) << 8;
-		iSize--;
-		uint16_t logType = 0;
-		logType += *ptr++;
-		logType += (*ptr++) << 8;
-		iSize--;
-		iSize--;
-		uint64_t log_time = 0;
-		log_time += *ptr++;
-		log_time += (*ptr++) << 8;
-		log_time += (*ptr++) << 16;
-		log_time += (*ptr++) << 24;
-		log_time += (*ptr++) << 32;
-		log_time += (*ptr++) << 40;
-		log_time += (*ptr++) << 48;
-		log_time += (*ptr++) << 56;
-		iSize -= 8;
-		std::cout << std::hex << std::showbase << "Received log. Log type:" << logType
-				  << " of length " << std::dec << (int)logOuterLength << ": b'" << "size: " << size << std::endl;
-		switch (logType)
-		{
-		case LOG_GSM_RR_SIGNALING_MESSAGE_C: // 2g
-		{
-			uint8_t *parser = ptr;
-			uint8_t channelType = (*parser++);
-			iSize--;
-			uint8_t messageType = (*parser++);
-			iSize--;
-			uint8_t length = (*parser++);
-			iSize--;
-			// packet = signalling_message[:length]!!!
+		// // decode header
+		// uint8_t pendingMsgs = *ptr++;
+		// uint16_t logOuterLength = 0;
+		// logOuterLength += *ptr++;
+		// logOuterLength += (*ptr++) << 8;
 
-			// std::cout << std::dec << std::endl << (int)(channelType) << "   " << (bool)(channelType & 0x80) << std::endl;
-			bool isUplink = (bool)(channelType & 0x80);
+		// log_hdr log_header;
+		// // inner log packet
 
-			auto gsmFind = gsmtapChannels.find(channelType & 0x7f);
-			if (gsmFind == gsmtapChannels.end())
-			{
-				std::cout << "Unkwnown channel type.. Error logic:(TO DO)";
-			}
-			uint8_t gsmChannelType = (*gsmFind).second;
-			// std::cout << std::dec << std::endl << (int)(gsmChannelType) << std::endl;
+		// log_header.len = *ptr++;
+		// log_header.len += (*ptr++) << 8;
+
+		// log_header.code = *ptr++;
+		// log_header.code += (*ptr++) << 8;
+
+		// log_header.ts = *ptr++;
+		// log_header.ts += (*ptr++) << 8;
+		// log_header.ts += (*ptr++) << 16;
+		// log_header.ts += (*ptr++) << 24;
+		// log_header.ts += (*ptr++) << 32;
+		// log_header.ts += (*ptr++) << 40;
+		// log_header.ts += (*ptr++) << 48;
+		// log_header.ts += (*ptr++) << 56;
+		std::cout << std::hex << std::showbase << "Received log. Log type:" << dp->msg_protocol
+				  << " of length " << std::dec << dp->len << " readed size:" << size << std::endl;
+		switch (dp->msg_protocol)
+		{
+		case GSM(LOG_GSM_RR_SIGNALING_MESSAGE_C): // 2g
+		{
+			handle_2g(dp, size);
 			uint8_t interfaceType = GSMTAP_TYPE_ABIS;
-			buildGsmtapIp(interfaceType, gsmChannelType, parser, isUplink);
-			/*if (gsmChannelType == GSMTAP_CHANNEL_BCCH || gsmChannelType)
-				parser++;*/
 		}
 		break;
-		case WCDMA_SIGNALLING_MESSAGE: // WCDMA
+		case WCDMA(LOG_WCDMA_SIGNALING_MSG_C): // WCDMA
 		{
 			std::cout << "WCDMA RECEIVED" << std::endl;
 			uint8_t *parser = ptr;
-			uint8_t channelType = (*parser++);
-			iSize--;
-			uint8_t radio_bearer = (*parser++);
-			iSize--;
-			uint16_t length = 0;
-			length += *parser++;
-			iSize--;
-			length += (*parser++) << 8;
-			iSize--;
-			// parser=signaling message
-			if (channelType >= 0x80)
-			{
-				channelType -= 0x80;
-				parser += 4;
-			}
+			diag_umts_rrc_msg wcdma_msg;
+			wcdma_msg.chan_type = (*parser++);
+			wcdma_msg.rb_id = (*parser++);
+			wcdma_msg.length = *parser++;
+			wcdma_msg.length += (*parser++) << 8;
 
-			parse3G(parser, (size_t)length);
+			handle_3g(dp,size);
 		}
-		case LOG_UMTS_NAS_OTA_MESSAGE_LOG_PACKET_C: // UMTS
+		case UMTS(LOG_UMTS_NAS_OTA_MESSAGE_LOG_PACKET_C): // UMTS
 		{
 			std::cout << "UMTS RECEIVED" << std::endl;
+			handle_3g(dp,size);
 			uint8_t *parser = ptr;
-			
-			uint8_t isUplink=0;
-			isUplink=(*parser++);
-			
-			uint32_t length = 0;
-			
-			length += *parser++;
-			length += (*parser++) << 8;
-			length += (*parser++) << 16;
-			length += (*parser++) << 24;
-			iSize -= 6;
+			diag_umts_nas_ota_msg umts_msg;
+			umts_msg.direction = (*parser++);
+
+			umts_msg.msg_length = *parser++;
+			umts_msg.msg_length += (*parser++) << 8;
+			umts_msg.msg_length += (*parser++) << 16;
+			umts_msg.msg_length += (*parser++) << 24;
 			// parser=signaling_message
-			parse3G(parser, (size_t)length);
+			
 		}
 		break;
 		case LOG_LTE_RRC_OTA_MSG_LOG_C: // 4g
@@ -148,53 +144,51 @@ bool DiagReq::Decode(size_t size)
 		case LOG_LTE_NAS_EMM_OTA_IN_MSG_LOG_C:
 		case LOG_LTE_NAS_EMM_OTA_OUT_MSG_LOG_C:
 		{
+			// std::cout << "LTE RECEIVED" << std::endl;
+			// uint8_t *parser = ptr;
+			// uint8_t extHeaderVer = (*parser++);
+			// uint8_t rrcRel = (*parser++);
+			// uint16_t rrcVer = (*parser++);
+			// uint8_t bearerId = (*parser++);
+
+			// uint16_t phyCellId = 0;
+			// phyCellId += *parser++;
+			// phyCellId += (*parser++) << 8;
+
+			// // parser=ext_header
+			// if (extHeaderVer >= 25)
+			// {
+			// 	parser = ptr;
+			// 	extHeaderVer = (*parser++);
+			// 	rrcRel = (*parser++);
+			// 	rrcVer = (*parser++);
+			// 	rrcVer += (*parser++) << 8;
+			// 	uint8_t ncRrcRel = (*parser++);
+			// 	bearerId = (*parser++);
+			// 	phyCellId = (*parser++);
+			// 	phyCellId += (*parser++) << 8;
+			// }
+			// else
+			// {
+			// }
+			// // parser=ext_header
+			// uint16_t length = 0;
+			// uint8_t freqType = 4; // H
+
+			// if (extHeaderVer < 8)
+			// 	freqType = 2; // I
+
+			// uint8_t headerSpec = freqType + 2 + 1 + 2; // freq_type + 'HBH'
+
+			// // if (*(parser + headerSpec - 1) != iSize - headerSpec)
+			// //	headerSpec = freqType + 2 + 1 + 4 + 2; // freqType + HB4xH
+			// parser += headerSpec - 2;
+			// length = *parser++;
+			// length += (*parser++) << 8;
+
 			std::cout << "LTE RECEIVED" << std::endl;
+			handle_4g(dp, size);
 
-			iSize-=3;//hdlc_decapsulate
-
-			uint8_t *parser = ptr;
-			uint8_t extHeaderVer = (*parser++);
-			uint8_t rrcRel = (*parser++);
-			uint16_t rrcVer = (*parser++);
-			uint8_t bearerId = (*parser++);
-
-			uint16_t phyCellId = 0;
-			phyCellId += *parser++;
-			phyCellId += (*parser++) << 8;
-
-			// parser=ext_header
-			if (extHeaderVer >= 25)
-			{
-				parser = ptr;
-				extHeaderVer = (*parser++);
-				rrcRel = (*parser++);
-				rrcVer = (*parser++);
-				rrcVer += (*parser++) << 8;
-				uint8_t ncRrcRel = (*parser++);
-				bearerId = (*parser++);
-				phyCellId = (*parser++);
-				phyCellId += (*parser++) << 8;
-				iSize-=8;
-			}
-			else{
-				iSize-=6;
-			}
-			// parser=ext_header
-			uint16_t length = 0;
-			uint8_t freqType = 4; // H
-
-			if (extHeaderVer < 8)
-				freqType = 2; // I
-
-			uint8_t headerSpec = freqType + 2 + 1 + 2; // freq_type + 'HBH'
-
-			if (*(parser + headerSpec - 1) != iSize - headerSpec)
-				headerSpec = freqType + 2 + 1 + 4 + 2; // freqType + HB4xH
-			parser += headerSpec - 2;
-			length = *parser++;
-			length += (*parser++) << 8;
-
-			parse4G(parser, (size_t)length);
 			//  while (ptr != &m_rxBuffer[size - 3])
 			//  {
 			//  	std::cout << std::hex << std::showbase << (int)(*ptr) << " ";
@@ -207,13 +201,19 @@ bool DiagReq::Decode(size_t size)
 
 			break;
 		default: // unknown log type
-			std::cout << "хуйня какая-то" << std::endl;
+			// std::cout << "хуйня какая-то" << std::endl;
 			break;
 		}
 
-		while (ptr != &m_rxBuffer[size - 3])
-			std::cout << std::hex << std::showbase << (int)(*ptr++) << " ";
-		std::cout<< std::endl;
+		while (1)
+		{
+			std::cout << std::hex << std::showbase << (int)(*packet) << " ";
+			if (*packet == 0x7e)
+				break;
+			else
+				packet++;
+		}
+		std::cout << std::endl;
 		break;
 	}
 	case DIAG_MULTI_RADIO_CMD_F:
@@ -241,23 +241,21 @@ bool DiagReq::Decode(size_t size)
 	return false;
 }
 
-void DiagReq::ReadCycle(msgQueue &q)
+void DiagReq::ReadCycle()
 {
-	size_t size = 0;
-	size = m_uart->ReadData(m_rxBuffer);
-	if (size <= 3)
+	uint32_t size = 0;
+	size = m_uart->ReadData(m_rxBuffer) - 1; // terminate "~" symbol
+
+	if ((int)size < 3)
 	{
+		std::cout << std::dec << (int)size << std::endl;
 		std::cout << "zalupa" << std::endl;
 		return;
 	}
+
 	std::cout << std::endl
 			  << "Read successfuly. Length =" << std::dec << (int)size << std::endl;
 	Decode(size);
-}
-
-void DiagReq::buildGsmtapIp(uint8_t gsmtapProtocol, uint8_t gsmtap_channel_type, uint8_t *payload, bool is_uplink)
-{
-	parse2G(payload);
 }
 
 bool DiagReq::StartREO()
@@ -267,7 +265,6 @@ bool DiagReq::StartREO()
 		std::cout << "Error in start REO" << std::endl;
 		return false;
 	}
-
 	switch (PacketNumber)
 	{
 	case LOG_CONGIF_FOR_RECEIVING_MSG:
@@ -292,6 +289,7 @@ bool DiagReq::StartREO()
 		if (!PushPacket(PacketNumber))
 		{
 			std::cout << "Push W-CDMA error. \n Exit..." << std::endl;
+			exit(1);
 			return false;
 		}
 		PacketNumber++;
@@ -301,6 +299,7 @@ bool DiagReq::StartREO()
 		if (!PushPacket(PacketNumber))
 		{
 			std::cout << "Push APPS/LTE/WIMAX error. \n Exit..." << std::endl;
+			exit(1);
 			return false;
 		}
 		PacketNumber++;
@@ -309,8 +308,10 @@ bool DiagReq::StartREO()
 
 		if (!PushPacket(PacketNumber))
 		{
-			std::cout << "Push UMTS error. \n Exit..." << std::endl;
+			std::cout << "Push wcdma error. \n Exit..." << std::endl;
+			exit(1);
 			return false;
+			
 		}
 		PacketNumber++;
 		break;
@@ -319,6 +320,7 @@ bool DiagReq::StartREO()
 		if (!PushPacket(PacketNumber))
 		{
 			std::cout << "Push UMTS error. \n Exit..." << std::endl;
+			exit(1);
 			return false;
 		}
 		return true;
@@ -402,4 +404,113 @@ bool DiagReq::PushPacket(uint8_t opNum)
 bool DiagReq::SendData(uint8_t *buffer, size_t size)
 {
 	return m_uart->SendData(buffer, size);
+}
+
+void DiagReq::handle_2g(struct diag_packet *dp, size_t size)
+{
+	std::cout << "Direction: " << ((bool)(dp->msg_type & 0x80) ? "Uplink" : "Downlink") << std::endl;
+	std::cout << "Channel type: " << (int)dp->msg_type;
+	switch (dp->msg_type & 0x7f)
+	{
+	case DCCH:
+		cout << "- DCCH";
+		break;
+	case BCCH:
+		cout << "- BCCH";
+		break;
+	case L2_RACH:
+		cout << "- L2_RACH";
+		break;
+	case CCCH:
+		cout << "- CCCH";
+		break;
+	case SACCH:
+		cout << "- SACCH";
+		break;
+	case SDCCH:
+		cout << "- SDCCH";
+		break;
+	case FACCH_F:
+		cout << "- FACCH_F";
+		break;
+	case FACCH_H:
+		cout << "- FACCH_H";
+		break;
+	case L2_RACH_WITH_NO_DELAY:
+		cout << "- L2_RACH_WITH_NO_DELAY";
+		break;
+	default:
+		break;
+	}
+	cout << endl;
+	parse2G(dp->data);
+}
+void DiagReq::handle_3g(diag_packet *dp, size_t size){
+	uint8_t payload_len= dp->len- 16;
+	switch (dp->msg_type)
+	{
+	case 0: /* UL-CCCH */
+		pduName = "UL-CCCH-Message";
+		break;
+	case 1: /* UL-DCCH */
+		pduName = "UL-DCCH-Message";
+		break;
+	case 2: /* DL-CCCH */
+		pduName = "DL-CCCH-Message";
+		break;
+	case 3: /* DL-DCCH */
+		pduName = "DL-DCCH-Message";
+		break;
+	case 4: /* DL-BCCH */
+		pduName = "DL-BCCH-Message";
+		break;
+	
+	default:
+		break;
+	}
+	parse3G(dp->data, payload_len, pduName);
+}
+void DiagReq::handle_4g(diag_packet *dp, size_t size)
+{
+	cout<< "data: "<<(int)dp->data[7] << endl;
+	switch (dp->msg_protocol)
+	{
+	case LOG_LTE_RRC_OTA_MSG_LOG_C:
+		switch (dp->data[7])
+		{
+		case 0:
+			pduName = "BCCH-BCH-Message";
+			break;
+		case 2: // BCCH-DL-SCH
+			pduName = "BCCH-DL-SCH-Message";
+			break;
+		case 3: // MCCH
+			pduName = "MCCH-Message";
+			break;
+		case 4: // PCCH
+			pduName = "PCCH-Message";
+			break;
+		case 5: // DL-CCCH
+			pduName = "DL-CCCH-Message";
+			break;
+		case 6: // DL-DCCH
+			pduName = "DL-DCCH-Message";
+			break;
+		case 7: // UL-CCCH
+			pduName = "UL-CCCH-Message";
+			break;
+		case 8: // UL-DCCH
+			pduName = "UL-DCCH-Message";
+			break;
+		default:
+			cout<< "unhandled 4G PDU" << endl;
+			return;
+		}
+		cout<< "Start parsing 4G " << pduName << endl;
+		parse4G(&dp->data[14], dp->data_len, pduName);
+		break;
+
+	default:
+		break;
+	}
 }

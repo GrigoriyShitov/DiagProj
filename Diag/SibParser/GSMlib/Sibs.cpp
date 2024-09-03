@@ -7,18 +7,16 @@ bool parse2G(uint8_t *packet)
 
 	GSMTAPPACK sib;
 	size_t size = sizeof(packet);
-	cout << size << endl;
+	cout <<"Size of packet:"<< size << endl;
 	uint8_t *ptr = packet;
-	// ����� ����� ��� ���� SIT �������
+	cout<< showbase <<hex<<"value ptr" << (int)*ptr<< endl;
 	sib.L2PseudoL = (*ptr++ & 0xFC) >> 2;
+	
 	sib.ProtDisc = *ptr & 0x0f;
 	sib.SkipInd = *ptr & 0xf0;
 	sib.MesType = *(++ptr);
-	//parse3G();
-	//parse4G();
 	if (sib.MesType == SYSTEM_INFORMATION_TYPE_1)
 	{
-
 		Sib1Pack pack;
 		memcpy(&pack, &sib, sizeof(GSMTAPPACK));
 		bool res = pack.Parse(++ptr);
@@ -87,9 +85,9 @@ bool parse2G(uint8_t *packet)
 		pack.printOutput();
 	}
 	else{
-		std::cout<<" Твой пакет гавно";
+		std::cout<<" Твой пакет гавно"<<std::endl;
 	}
-
+	//cout<< dec<<"shift: "<<(int)(ptr-packet)<< " last byte:"<< hex<<showbase<<(int)*ptr<< endl;
 	return 0;
 }
 
@@ -659,6 +657,8 @@ void Sib2terPack::printOutput()
 
 bool Sib3Pack::Parse(uint8_t* ptr)
 {
+	uint8_t *shift=ptr;
+
 	ptr = CIDparse(CID, ptr);
 	
 
@@ -682,6 +682,8 @@ bool Sib3Pack::Parse(uint8_t* ptr)
 	Rest[1] = *ptr++;
 	Rest[2] = *ptr++;
 	Rest[3] = *ptr;
+
+	cout<< "SHIFT: "<<dec << showbase<< (int)(ptr-shift)<<endl;
 	return true;
 }
 

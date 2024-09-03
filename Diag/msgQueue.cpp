@@ -2,11 +2,11 @@
 
 bool msgQueue::terminateWork()
 {
-	terminateVar = TERMINATE_WORK;
+	terminateVar = true;
 	return true;
 }
 
-uint8_t msgQueue::getTermVar()
+bool msgQueue::getTermVar()
 {
 	return terminateVar;
 }
@@ -18,6 +18,15 @@ bool msgQueue::pushN(int value)
 	sem.release();
 	qlock.unlock();
 	return false;
+}
+
+bool msgQueue::pushTo(int value, msgQueue &qTo)
+{
+
+	std::unique_lock<std::mutex> qlock(mtx);
+	qTo.pushN(value);
+	qlock.unlock();
+	return true;
 }
 
 uint8_t msgQueue::front()
@@ -37,9 +46,24 @@ bool msgQueue::popN()
 	return false;
 }
 
+int msgQueue::sizeq()
+{
+	return q.size();
+}
+
+bool msgQueue::checkmsg()
+{
+	if (sem.try_acquire())
+	{
+		return true;
+	}
+    return false;
+}
+
+
+
 void msgQueue::waitData()
 {
-	if (getTermVar() == TERMINATE_WORK)
-		return;
+
 	sem.acquire();
 }
