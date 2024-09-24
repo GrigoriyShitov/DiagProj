@@ -7,10 +7,12 @@
 #include <map>
 #include <fstream>
 #include "CeThread.h"
+#include "Main.h"
 #include "Payload.h"
 #include "StructPack.h"
 #include "protocol/subsyscdm.h"
 #include "protocol/CMLOG_SYS_SEL_REQ_F.h"
+#include "protocol/CMLOG_SYSTEM_SELECTION_PERFERENCE_PER_ SUBS_REQ_F.h"
 #include "SibParser/GSMlib/Sibs.h"
 #include "SibParser/UMTSlib/build/UMTS.h"
 #include "SibParser/LTElib/build/LTE.h"
@@ -59,7 +61,7 @@ public:
 		m_uart = comPort;
 	};
 
-	bool ExecuteStep(msgQueue& q);
+	bool ExecuteStep();
 	bool SwitchMode(uint8_t mode);
 	bool Decode(size_t size);
 	bool Timeout()
@@ -73,7 +75,7 @@ public:
 	bool Init();
 	bool inited = false;
 private:
-
+	void ReadSingleResponse(msgQueue &qM);
 	bool SendData(uint8_t* buffer, size_t size);
 	void handle_2g(struct diag_packet* dp, size_t size);
 	void handle_3g(diag_packet *dp, size_t size);

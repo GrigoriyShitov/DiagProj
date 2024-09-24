@@ -1,18 +1,21 @@
 ﻿#include "DiagRequest.h"
+#include "Main.h"
 #include "ConsoleReadThread.h"
 #include "SibParser/GSMlib/Sibs.h"
-
-void start();
 msgQueue qM, qC;
-bool ExecuteStepHandle(DiagReq &diag, msgQueue &q)
+void start();
+
+bool ExecuteStepHandle(DiagReq &diag)
 {
 	bool iret = false;
-	iret = diag.ExecuteStep(q);
-
-	if (!diag.inited)
-	{
-		diag.Init();
+	qM.waitData();
+	while (qM.front() != msgSimInit){
+		qM.waitData();
+		qM.popN();
 	}
+	diag.Init();
+	iret = diag.ExecuteStep();
+
 
 	return iret;
 }
@@ -36,17 +39,13 @@ int main()
 	std::thread t0(CeMain, std::ref(SimPort), std::ref(qC), std::ref(qM)); // read thread
 	std::thread t1(ConsoleReadThread, std::ref(qC), std::ref(qM));		   // programm controll thread
 	// std::thread t2(Timer(DiagReq& diag));
-
+	iret= ExecuteStepHandle(diag);
+	
+	//iret =true;
 	while (true)
 	{
-		qM.waitData();
-		uint8_t msg = qM.front();
-		if (msg == msgTerminate)
-		{
-			break;
-		}
-		iret = ExecuteStepHandle(diag, qM);
-		qM.popN();
+		
+		
 		if (iret == infinityReadStart)
 		{
 			while (!qM.getTermVar())

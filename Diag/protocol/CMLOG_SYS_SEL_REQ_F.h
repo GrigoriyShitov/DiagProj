@@ -15,7 +15,7 @@ struct CMLOG_SYS_SEL_REQ_F_{
     uint32_t ROAM_PREF;
     uint32_t HYBR_PREF;
     uint32_t SRV_DOMAIN_PREF;
-}typedef diag_mode_config_req;
+}typedef cmlog_sys_sel_req;
 
 //Automatic mode ignores plmn_requested parameter
 #define PLMN_SELECTION_MODE_AUTOMATIC uint8_t(0)

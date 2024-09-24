@@ -4,6 +4,7 @@
 #include "ConsoleReadThread.h"
 #include "SibParser/GSMlib/Sibs.h"
 
+extern msgQueue qM, qC;
 
 int main();
 
