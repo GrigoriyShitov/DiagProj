@@ -113,6 +113,11 @@ private:
 	uint8_t* Head = RXbuf;
 	uint8_t RXbuf[bufSize];//�������
 	uint8_t TXbuf[bufSize];//���������
+
+	uint8_t rxQueueBuffer[bufSize];
+	std::mutex queueMutex;
+	size_t head;
+	size_t tail;
 };
 
 

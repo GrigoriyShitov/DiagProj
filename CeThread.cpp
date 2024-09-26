@@ -1,27 +1,51 @@
 #include "CeThread.h"
 #include "DiagRequest.h"
 
-bool HARERABOTAT = false;
-
-void CeMain(SerialPort &SimPort, msgQueue &q)
+void CeMain(SerialPort &SimPort, msgQueue &qC, msgQueue &qM)
 {
 
 	bool iret = SimPort.Init(); // com port initialization;
-
+	bool res;
+	SimPort.Flush();
 	if (iret)
 	{
 		std::cout << "Connected!\n";
-		q.pushN(msgSimInit);
+		qC.waitData();
+		qC.popN();
+		qC.pushTo(msgSimInit, qM);
 		while (1)
 		{
-
-			bool res = SimPort.ReadToRX();
+			res = SimPort.ReadToRX();
 			if (res)
 			{
 				while (SimPort.ReadToRX())
 				{
 				};
-				q.pushN(msgDataAvail);
+				qC.pushTo(msgDataAvail, qM);
+			}
+			while (qC.checkmsg())
+			{
+				
+				if (qC.front() == msgStop)
+				{
+					qC.popN();
+					qC.waitData();
+					switch (qC.front())
+					{
+					case msgContinue:
+						break;
+					case msgTerminate:
+						qC.terminateWork();
+						SimPort.Flush();
+						SimPort.CloseConnection();
+						std::cout << "Disconnected!\n";
+					
+						return;
+					default:
+						break;
+					}
+					qC.popN();
+				}
 			}
 		}
 
@@ -29,7 +53,8 @@ void CeMain(SerialPort &SimPort, msgQueue &q)
 	}
 	else
 	{
-		q.pushN(TERMINATE_WORK);
+		qC.pushTo(msgTerminate, qM);
+		qC.terminateWork();
 		std::cout << "Not connected!\n";
 		return;
 	}

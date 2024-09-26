@@ -2,11 +2,25 @@
 #ifndef MSGQUEUE_H
 #define MSGQUEUE_H
 
-#define TERMINATE_WORK (uint8_t(255))
 
 #include <queue> 
 #include <mutex>
 #include <semaphore>
+
+#define msgSimInit (0)
+#define msgDataAvail (1)
+
+#define msgSwitchTo2g (0x32)//2 keypad
+#define msgSwitchTo3g (0x33)//3 keypad
+#define msgSwitchTo4g (0x34)//4 keypad
+
+
+#define msgStop (0x20)
+#define msgContinue (0x1b)
+
+#define msgUnknown (253)
+#define msgStart (254)
+#define msgTerminate (255)
 
 class msgQueue
 {
@@ -14,13 +28,15 @@ private:
 	std::queue<int> q;
 	std::mutex mtx;
 	std::counting_semaphore<200> sem{ 0 };
-	uint8_t terminateVar = 0;
+	bool terminateVar = false;
 public:
 	bool terminateWork();
-	uint8_t getTermVar();
+	bool getTermVar();
 	bool pushN(int value);
+	bool pushTo(int value, msgQueue& qTo);
 	bool popN();
-	int sizeq() { return 0; };
+	int sizeq();
+	bool checkmsg(); 
 	uint8_t front();
 	void waitData();
 

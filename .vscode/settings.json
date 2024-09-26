@@ -5,6 +5,7 @@
   "C_Cpp_Runner.cStandard": "",
   "C_Cpp_Runner.cppStandard": "",
   "C_Cpp_Runner.msvcBatchPath": "",
+  "C_Cpp.default.cppStandard": "c++20",
   "C_Cpp_Runner.useMsvc": false,
   "C_Cpp_Runner.warnings": [
     "-Wall",
@@ -116,5 +117,6 @@
     "typeinfo": "cpp",
     "sysexits.h": "c",
     "cinttypes": "cpp"
-  }
+  },
+  "makefile.configureOnOpen": true
 }
