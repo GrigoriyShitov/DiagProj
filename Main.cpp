@@ -56,6 +56,8 @@ int main()
 				case msgTerminate:
 					qM.terminateWork();
 					break;
+				// case msgDisableLog:
+
 				case msgSwitchTo2g:
 					if (diag.SwitchMode(msgSwitchTo2g))
 						cout << "2g mode" << endl;

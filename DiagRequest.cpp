@@ -34,7 +34,7 @@ bool DiagReq::SwitchMode(uint8_t mode)
 	var2.PLMN[1] = 0;
 	var2.PLMN[2] = 0;
 	var2.acq_order_pref = 3;
-	var2.band_pref = 3;
+	var2.band_pref = uint32_t(0x40000000);
 	var2.roam_pref = 0x100;
 	var2.hybr_pref = 2;
 	var2.srv_domain_pref = 3;
@@ -46,7 +46,7 @@ bool DiagReq::SwitchMode(uint8_t mode)
 		break;
 	case msgSwitchTo3g:
 		var.MODE_PREF = WCDMA_ONLY;
-		var2.mode_pref = WCDMA_ONLY;
+		var2.mode_pref = 14;
 		break;
 	case msgSwitchTo4g:
 		var.MODE_PREF = LTE_ONLY;
@@ -55,10 +55,24 @@ bool DiagReq::SwitchMode(uint8_t mode)
 	default:
 		break;
 	}
-	// payload = StructPack::pack(buffer, 1000, "BHBBBBIIIIII", var.SUBSYS_ID, var.SUBSYS_CMD_CODE, var.PLMN_SELECTION_MODE, var.PLMN_REQUESTED[0], var.PLMN_REQUESTED[1], var.PLMN_REQUESTED[2], var.MODE_PREF, var.GW_ACQ_ORDER_PREF, var.BAND_PREF, var.ROAM_PREF, var.HYBR_PREF, var.SRV_DOMAIN_PREF); // CMLOG_SYS_SEL_REQ_F
-	// uint32_t size = Payload::SetPayload(var.CMD_CODE, buffer, payload, m_txBuffer);
-	payload = StructPack::pack(buffer, 1000, "BHBBBBBIIIIII", var2.SUBSYS_ID, var2.SUBSYS_CMD_CODE, var2.asubs_id, var2.network_sel_mode_pref, var2.PLMN[0], var2.PLMN[1], var2.PLMN[2], var2.mode_pref,var2.acq_order_pref, var2.band_pref, var2.roam_pref, var2.hybr_pref, var2.srv_domain_pref); // CM_SYSTEM_SELECTION_PREFERENCE_PER_SUBS
-	uint32_t size = Payload::SetPayload(var2.CMD_CODE, buffer, payload, m_txBuffer);
+	payload = StructPack::pack(buffer, 1000, "BHBBBBIIIIII", var.SUBSYS_ID, var.SUBSYS_CMD_CODE, var.PLMN_SELECTION_MODE, var.PLMN_REQUESTED[0], var.PLMN_REQUESTED[1], var.PLMN_REQUESTED[2], var.MODE_PREF, var.GW_ACQ_ORDER_PREF, var.BAND_PREF, var.ROAM_PREF, var.HYBR_PREF, var.SRV_DOMAIN_PREF); // CMLOG_SYS_SEL_REQ_F
+	uint32_t size = Payload::SetPayload(var.CMD_CODE, buffer, payload, m_txBuffer);
+	//payload = StructPack::pack(buffer, 1000, "BHBBBBBIIIIII", var2.SUBSYS_ID, var2.SUBSYS_CMD_CODE, var2.asubs_id, var2.network_sel_mode_pref, var2.PLMN[0], var2.PLMN[1], var2.PLMN[2], var2.mode_pref,var2.acq_order_pref, var2.band_pref, var2.roam_pref, var2.hybr_pref, var2.srv_domain_pref); // CM_SYSTEM_SELECTION_PREFERENCE_PER_SUBS
+	//uint32_t size = Payload::SetPayload(var2.CMD_CODE, buffer, payload, m_txBuffer);
+	// uint8_t check[] ={0xf, 
+	// 0x1a, 0, 
+	// 0,
+	// 0,
+	// 0,0,0,
+	// 0,0,0,0xd,
+	// 0,0,0,0x3,
+	// 0x40,0,0,0,
+	// 0,0,0,0xff,
+	// 0,0,0,0x2,
+	// 0,0,0,4
+	// };
+	// size_t checksize = sizeof(check) / sizeof(uint8_t);
+	// uint32_t size = Payload::SetPayload(var2.CMD_CODE, check, checksize, m_txBuffer);
 
 	return SendData(m_txBuffer, size);
 }
