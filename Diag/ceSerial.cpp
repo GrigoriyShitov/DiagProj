@@ -567,6 +567,7 @@ long ceSerial::Open(void)
 	fd = open(port.c_str(), O_RDWR | O_NONBLOCK);
 	if (fd == -1)
 	{
+		printf("Error %i from open: %s\n", errno, strerror(errno));
 		return -1;
 	}
 

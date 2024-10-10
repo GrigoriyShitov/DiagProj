@@ -116,7 +116,12 @@
     "thread": "cpp",
     "typeinfo": "cpp",
     "sysexits.h": "c",
-    "cinttypes": "cpp"
+    "cinttypes": "cpp",
+    "charconv": "cpp",
+    "optional": "cpp",
+    "format": "cpp",
+    "span": "cpp",
+    "variant": "cpp"
   },
   "makefile.configureOnOpen": true
 }

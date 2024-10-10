@@ -205,7 +205,7 @@
 /* 74 Reserved */
 
 /* Subssytem dispatcher (extended diag cmd)   */
-#define DIAG_SUBSYS_CMD_F   75 
+#define DIAG_SUBSYS_CMD_F   uint8_t(75) 
 
 /* 76-80 Reserved */
 
