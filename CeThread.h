@@ -1,12 +1,10 @@
 #include "Payload.h"
 #include "StructPack.h"
-#include "Interface.h"
-#include "msgQueue.h"
 #ifndef CETHREAD_H
 #define CETHREAD_H
 
 
-void CeMain(SerialPort& SimPort,msgQueue &qC,msgQueue &qM);
+void CeMain(SerialPort& SimPort,bool &closeConnection);
 
 
 #endif

@@ -121,7 +121,11 @@
     "optional": "cpp",
     "format": "cpp",
     "span": "cpp",
-    "variant": "cpp"
+    "variant": "cpp",
+    "pdu_collection.c": "cpp",
+    "lte.h": "c",
+    "asn_internal.h": "c",
+    "asn_application.h": "c"
   },
   "makefile.configureOnOpen": true
 }

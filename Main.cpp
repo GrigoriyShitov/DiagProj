@@ -1,21 +1,30 @@
 ﻿#include "DiagRequest.h"
 #include "Main.h"
-#include "ConsoleReadThread.h"
 #include "SibParser/GSMlib/Sibs.h"
-msgQueue qM, qC;
 void start();
 
 bool ExecuteStepHandle(DiagReq &diag)
 {
 	bool iret = false;
-	qM.waitData();
-	while (qM.front() != msgSimInit){
-		qM.waitData();
-		qM.popN();
-	}
-	diag.Init();
-	iret = diag.ExecuteStep();
 
+	iret = diag.Init();
+	if (!iret)
+	{
+		DEBUG_MSG("DEBUG: Init error\n");
+		return iret;
+	}
+	iret = diag.ZeroLog();
+	if (!iret)
+	{
+		DEBUG_MSG("DEBUG: ZeroLog error\n");
+		return iret;
+	}
+	iret = diag.StartREO();
+	if (!iret)
+	{
+		DEBUG_MSG("DEBUG: StartREO error\n");
+		return iret;
+	}
 
 	return iret;
 }
@@ -29,67 +38,47 @@ bool TimeoutHandle(DiagReq &diag)
 	return true;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
 	SerialPort SimPort; // serial port interface
 	DiagReq diag(&SimPort);
+	uint8_t msgBuffer[bufSize];
 	bool iret = false;
+	bool closeConnection = false;
+	DEBUG_MSG("DEBUG: Verbose mode");
 	start();
+	iret = ExecuteStepHandle(diag);
+	std::thread t0(CeMain, std::ref(SimPort), std::ref(closeConnection)); // read thread
+	// std::thread t1(ConsoleReadThread, std::ref(qC), std::ref(qM));		   // programm controll thread
+	//  std::thread t2(Timer(DiagReq& diag));
 
-	std::thread t0(CeMain, std::ref(SimPort), std::ref(qC), std::ref(qM)); // read thread
-	std::thread t1(ConsoleReadThread, std::ref(qC), std::ref(qM));		   // programm controll thread
-	// std::thread t2(Timer(DiagReq& diag));
-	iret= ExecuteStepHandle(diag);
-	
-	//iret =true;
-	while (true)
+	// iret =true;
+	while (iret)
 	{
-		
-		
-		if (iret == infinityReadStart)
+		while (getchar() != 'q')
 		{
-			while (!qM.getTermVar())
+			if (getchar() == '0')
 			{
-				qM.waitData();
-				switch (qM.front())
-				{
-				case msgTerminate:
-					qM.terminateWork();
-					break;
-				// case msgDisableLog:
-
-				case msgSwitchTo2g:
-					if (diag.SwitchMode(msgSwitchTo2g))
-						cout << "2g mode" << endl;
-					qC.pushN(msgContinue);
-					qM.popN();
-					continue;
-				case msgSwitchTo3g:
-					if (diag.SwitchMode(msgSwitchTo3g))
-						cout << "3g mode" << endl;
-					qC.pushN(msgContinue);
-					qM.popN();
-					continue;
-				case msgSwitchTo4g:
-					if (diag.SwitchMode(msgSwitchTo4g))
-						cout << "4g mode" << endl;
-					qC.pushN(msgContinue);
-					qM.popN();
-					continue;
-				case msgDataAvail:
-				case msgSimInit:
-					diag.ReadCycle();
-					qM.popN();
-					continue;
-				default:
-					continue;
-				}
+				diag.ZeroLog();
+				continue;
 			}
-			break;
+			if (getchar() == 'g')
+			{
+				diag.StartREO();
+				continue;
+			}
+			int size = diag.ReadCycle(*msgBuffer);
+			if (size != -1)
+			{
+				diag.Decode(size, msgBuffer);
+			}
 		}
+		
+		break;
 	}
+	closeConnection = true;
 	t0.join();
-	t1.join();
+	SimPort.CloseConnection();
 	return 0;
 }
 

@@ -1,6 +1,5 @@
 #include"Interface.h"
-
-using namespace std;
+#include <string>
 
 const unsigned short crctable[256] = {
 	0x0000,0x1189,0x2312,0x329b,0x4624,0x57ad,0x6536,0x74bf,
@@ -98,20 +97,20 @@ bool SerialPort::SendData(uint8_t* dta, uint32_t size, bool async)
 {
 	bool iret = false;
 
-	cout << endl << "Sending request: ";
+	DEBUG_MSG("DEBUG: Sending request: \n");
 	memcpy(TXbuf, dta, size);
 	for (int i = 0;i < size;i++)
 	{
-		cout << hex << showbase << (int)TXbuf[i] << " ";
+		DEBUG_MSG(std::format("0x{:x} ", (int)TXbuf[i]));	
 	}
-	cout << endl;
+	DEBUG_MSG("\n");
 	memset(dta, 0, size);
 	iret = ce_uart->Write(TXbuf, size);
 	return iret;
 }
 
 
-uint32_t SerialPort::ReadData(uint8_t* bufferPtr)//чтение из RX 
+uint32_t SerialPort::ReadData(uint8_t* bufferPtr)//С‡С‚РµРЅРёРµ РёР· RX 
 {
 	bool iret = false;
 	uint8_t* ptr = bufferPtr;
@@ -124,8 +123,8 @@ uint32_t SerialPort::ReadData(uint8_t* bufferPtr)//чтение из RX
 			Tail = RXbuf;
 		else
 		{
-			if (*Tail == 0x7e) { Tail++; break; }// обрубаем чтение из Rx по признаку конца пакета
-			Tail++;// не конец пакета
+			if (*Tail == 0x7e) { Tail++; break; }// РѕР±СЂСѓР±Р°РµРј С‡С‚РµРЅРёРµ РёР· Rx РїРѕ РїСЂРёР·РЅР°РєСѓ РєРѕРЅС†Р° РїР°РєРµС‚Р°
+			Tail++;// РЅРµ РєРѕРЅРµС† РїР°РєРµС‚Р°
 		}
 		ptr++;
 
@@ -139,20 +138,19 @@ uint32_t SerialPort::GetDataSize()
 	return ce_uart->GetDataSize();
 }
 
-bool SerialPort::ReadToRX()//в цесериал побайтовое чтение и запись в RX
+bool SerialPort::ReadToRX()//РІ С†РµСЃРµСЂРёР°Р» РїРѕР±Р°Р№С‚РѕРІРѕРµ С‡С‚РµРЅРёРµ Рё Р·Р°РїРёСЃСЊ РІ RX
 {
 	bool iret = false;
 
 	uint8_t dta = ce_uart->ReadChar(iret);
 	if (!iret)
 		return iret;
-	//cout << (int)dta<< " ";
 	*(Head++) = dta;
 	if (Head >= &RXbuf[bufSize])
 		Head = RXbuf;
 	if (dta == 0x7e) {
 		iret = false;
-	}// обрубаем по причине конец пакета
+	}// РѕР±СЂСѓР±Р°РµРј РїРѕ РїСЂРёС‡РёРЅРµ РєРѕРЅРµС† РїР°РєРµС‚Р°
 	return iret;
 }
 

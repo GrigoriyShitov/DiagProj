@@ -637,7 +637,7 @@ bool ceSerial::IsOpened()
 		return true;
 }
 
-void ceSerial::SetBaudRate(long baudrate)
+void ceSerial::SetBaudRate(int64_t baudrate)
 {
 	stdbaud = true;
 	if (baudrate == 0)
@@ -683,7 +683,7 @@ void ceSerial::SetBaudRate(long baudrate)
 	}
 }
 
-long ceSerial::GetBaudRate()
+int64_t ceSerial::GetBaudRate()
 {
 	return baud;
 }

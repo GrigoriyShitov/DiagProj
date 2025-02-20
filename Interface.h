@@ -11,6 +11,7 @@
 #include <mutex>
 #include <semaphore>
 #include <chrono>
+#include <string>
 #include "ceSerial.h"
 
 #define bufSize 6144
@@ -18,67 +19,47 @@
 #define INIT 0xFFFF
 #define XOROT 0xFFFF
 
-/**
- * @brief The UartInterface class ��������� ��� �������������� � ���������-��������� UART
- */
+#define UNUSED(x) (void)x;
+
+#ifdef VERBOSE_MODE
+
+#define DEBUG_MSG(msg)                                              \
+	{                                                               \
+		std::cout << msg; \
+	}
+
+#else
+
+#define DEBUG_MSG(msg) UNUSED(msg)
+
+#endif
+
+
 class UartInterface {
 public:
 	explicit  UartInterface() {};
 	virtual ~UartInterface() {};
 
-	/**
-	 * @brief Init �������������� Uart. ������������� �������� ������������� ��� ����������� �������������
-	 * @return True � ������ ������, False � ������ ������
-	 */
+
 	virtual bool Init() = 0;
 
-	/**
-	 * @brief DataAvail ��������� ������� ������ �� ������� ������ UART
-	 * @return True, ���� ������ ����, False, ���� ����� ������
-	 */
 	virtual bool DataAvail() = 0;
-
-	/**
-	 * @brief GetByte �������� 1 ���� �� ������. ���������� ������������ � ���� � DataAvail()
-	 * @return ���� ��� 0, ���� ������ ���
-	 */
 	virtual uint8_t GetByte(bool& res) = 0;
 
-	/**
-	 * @brief SendData ��������� ������ � UART. ����� ������ ������ ������� ����� ����� ���� ����������� �����
-	 * @param dta ��������� �� ����� � �������
-	 * @param size ������ ������������ ������
-	 * @param async ����������� ����������, True - ����������� �����, False - ����������� ����� �� ������� ������ �������� ������
-	 * � ������, ���� � ������� ������ ������� ������ ��� �� ����������� - ����� ����������� ���������� �� ������� �������� ������.
-	 * @return True � ������ ������, False � ������ ������
-	 */
+
 	virtual bool SendData(uint8_t* dta, uint32_t size, bool async = false) = 0;
 
-	/**
-	 * @brief ReadData ��������� ������ �� RX ������
-	 * @param bufferPtr ��������� �� �����
-	 * @return ������ ����������� ������
-	 */
+
 	virtual uint32_t ReadData(uint8_t* bufferPtr) = 0;
 
 	virtual void CloseConnection() = 0;
 
-	/**
-	 * @brief GetDataSize �������� ����� ����, ������� �� ������� ������ UART
-	 * @return ����� ���� � ������
-	 */
+
 	virtual uint32_t GetDataSize() = 0;
 
-	/**
-	* @brief CreateCRC16 ������� ����������� ����� ����
-	* @param blk_adr ��������� �� ������ ����
-	* @return 2 ����� ����������� �����
-	*/
+
 	static uint16_t CreateCRC16(unsigned char* blk_adr, unsigned char blk_len);
 
-	/**
-	 * @brief Flush ������� �������� ������ UART
-	 */
 	virtual void Flush() = 0;
 };
 
@@ -111,8 +92,8 @@ private:
 	ceSerial* ce_uart = nullptr;
 	uint8_t* Tail= RXbuf;
 	uint8_t* Head = RXbuf;
-	uint8_t RXbuf[bufSize];//�������
-	uint8_t TXbuf[bufSize];//���������
+	uint8_t RXbuf[bufSize];//accept
+	uint8_t TXbuf[bufSize];//send
 
 	uint8_t rxQueueBuffer[bufSize];
 	std::mutex queueMutex;
